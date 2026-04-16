@@ -5,6 +5,7 @@ import Productos from "./pages/Productos";
 import Clientes from "./pages/Clientes";
 import Eventos from "./pages/Eventos";
 import Reservas from "./pages/Reservas";
+import "./App.css";
 
 function App() {
   return (

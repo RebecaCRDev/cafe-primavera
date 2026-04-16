@@ -79,20 +79,36 @@ function TPV() {
   };
 
   return (
-    <div style={{ display: "flex", height: "calc(100vh - 60px)" }}>
+    <div
+      style={{
+        display: "flex",
+        flex: 1,
+        height: "calc(100vh - 64px)",
+        overflow: "hidden",
+      }}
+    >
       {/* Panel izquierdo - Productos */}
-      <div style={{ flex: 1, padding: "1.5rem", overflowY: "auto" }}>
-        <h2 style={{ color: "#f5e6d3", marginBottom: "1rem" }}>Productos</h2>
+      <div
+        style={{
+          flex: 1,
+          padding: "2rem",
+          overflowY: "auto",
+          background: "#f9f5f0",
+        }}
+      >
+        <h2
+          style={{
+            marginBottom: "1.2rem",
+            fontSize: "1.4rem",
+            letterSpacing: "0.06em",
+          }}
+        >
+          Productos
+        </h2>
 
         <select
           onChange={(e) => setFiltro(e.target.value)}
-          style={{
-            marginBottom: "1rem",
-            padding: "0.5rem",
-            borderRadius: "4px",
-            border: "none",
-            width: "100%",
-          }}
+          style={{ marginBottom: "1.5rem", width: "280px" }}
         >
           <option value="">Todas las categorías</option>
           {categorias.map((c) => (
@@ -105,8 +121,8 @@ function TPV() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))",
-            gap: "1rem",
+            gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+            gap: "1.2rem",
           }}
         >
           {productosFiltrados.map((p) => (
@@ -114,25 +130,49 @@ function TPV() {
               key={p.id}
               onClick={() => añadirAlCarrito(p)}
               style={{
-                background: "#1a1a1a",
-                border: "1px solid #2d5016",
-                borderRadius: "8px",
-                padding: "1rem",
+                background: "#fff",
+                border: "1px solid #e8ddd0",
+                borderRadius: "12px",
+                padding: "1.8rem 1.5rem",
                 cursor: "pointer",
-                textAlign: "left",
-                color: "white",
+                textAlign: "center",
+                color: "#3a3028",
+                boxShadow: "0 1px 6px rgba(0,0,0,0.05)",
+                transition: "all 0.2s",
+                fontFamily: "Georgia, serif",
+                minHeight: "130px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.4rem",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.boxShadow =
+                  "0 4px 16px rgba(107,124,74,0.2)";
+                e.currentTarget.style.borderColor = "#6b7c4a";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.boxShadow = "0 1px 6px rgba(0,0,0,0.05)";
+                e.currentTarget.style.borderColor = "#e8ddd0";
               }}
             >
-              <div style={{ fontWeight: "bold", marginBottom: "0.3rem" }}>
+              <div
+                style={{
+                  fontWeight: "bold",
+                  fontSize: "1rem",
+                  marginBottom: "0.3rem",
+                }}
+              >
                 {p.nombre}
               </div>
-              <div style={{ color: "#f5e6d3", fontSize: "1.1rem" }}>
+              <div style={{ color: "#6b7c4a", fontSize: "1.4rem" }}>
                 {p.precio}€
               </div>
               <div
                 style={{
-                  color: p.stock < 10 ? "#ff6b6b" : "#aaa",
-                  fontSize: "0.8rem",
+                  color: p.stock < 10 ? "#c0392b" : "#b0a090",
+                  fontSize: "0.78rem",
                 }}
               >
                 Stock: {p.stock}
@@ -145,22 +185,36 @@ function TPV() {
       {/* Panel derecho - Carrito */}
       <div
         style={{
-          width: "320px",
-          background: "#1a1a1a",
-          padding: "1.5rem",
+          width: "340px",
+          minWidth: "340px",
+          background: "#fff",
+          padding: "2rem",
           display: "flex",
           flexDirection: "column",
-          borderLeft: "1px solid #2d5016",
+          borderLeft: "1px solid #e8ddd0",
+          boxShadow: "-2px 0 12px rgba(0,0,0,0.04)",
         }}
       >
-        <h2 style={{ color: "#f5e6d3", marginBottom: "1rem" }}>
+        <h2
+          style={{
+            marginBottom: "1.5rem",
+            fontSize: "1.2rem",
+            letterSpacing: "0.06em",
+          }}
+        >
           Pedido actual
         </h2>
 
         <div style={{ flex: 1, overflowY: "auto" }}>
           {carrito.length === 0 ? (
             <p
-              style={{ color: "#aaa", textAlign: "center", marginTop: "2rem" }}
+              style={{
+                color: "#b0a090",
+                textAlign: "center",
+                marginTop: "3rem",
+                fontSize: "0.9rem",
+                fontStyle: "italic",
+              }}
             >
               Pulsa un producto para añadirlo
             </p>
@@ -172,16 +226,23 @@ function TPV() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "0.75rem 0",
-                  borderBottom: "1px solid #333",
+                  padding: "0.85rem 0",
+                  borderBottom: "1px solid #f0e8dc",
                 }}
               >
                 <div>
-                  <div style={{ color: "white", fontSize: "0.9rem" }}>
+                  <div
+                    style={{
+                      color: "#3a3028",
+                      fontSize: "0.9rem",
+                      marginBottom: "0.2rem",
+                    }}
+                  >
                     {item.producto.nombre}
                   </div>
-                  <div style={{ color: "#aaa", fontSize: "0.8rem" }}>
-                    {item.producto.precio}€ x {item.cantidad}
+                  <div style={{ color: "#9e8e7e", fontSize: "0.8rem" }}>
+                    {item.producto.precio}€ × {item.cantidad} ={" "}
+                    {(item.producto.precio * item.cantidad).toFixed(2)}€
                   </div>
                 </div>
                 <div
@@ -194,26 +255,38 @@ function TPV() {
                   <button
                     onClick={() => quitarDelCarrito(item.producto.id)}
                     style={{
-                      background: "#5c1a1a",
-                      color: "white",
+                      background: "#f5e8e8",
+                      color: "#c0392b",
                       border: "none",
                       borderRadius: "4px",
-                      padding: "0.2rem 0.5rem",
+                      width: "26px",
+                      height: "26px",
                       cursor: "pointer",
+                      fontSize: "1rem",
                     }}
                   >
-                    -
+                    −
                   </button>
-                  <span style={{ color: "white" }}>{item.cantidad}</span>
+                  <span
+                    style={{
+                      color: "#3a3028",
+                      minWidth: "20px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {item.cantidad}
+                  </span>
                   <button
                     onClick={() => añadirAlCarrito(item.producto)}
                     style={{
-                      background: "#2d5016",
-                      color: "white",
+                      background: "#e8f0e0",
+                      color: "#4a6030",
                       border: "none",
                       borderRadius: "4px",
-                      padding: "0.2rem 0.5rem",
+                      width: "26px",
+                      height: "26px",
                       cursor: "pointer",
+                      fontSize: "1rem",
                     }}
                   >
                     +
@@ -226,8 +299,8 @@ function TPV() {
 
         <div
           style={{
-            borderTop: "1px solid #2d5016",
-            paddingTop: "1rem",
+            borderTop: "1px solid #e8ddd0",
+            paddingTop: "1.2rem",
             marginTop: "1rem",
           }}
         >
@@ -235,15 +308,26 @@ function TPV() {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              marginBottom: "1rem",
+              marginBottom: "1.2rem",
+              alignItems: "baseline",
             }}
           >
-            <span style={{ color: "#aaa" }}>Total</span>
             <span
               style={{
-                color: "#f5e6d3",
-                fontSize: "1.5rem",
-                fontWeight: "bold",
+                color: "#9e8e7e",
+                letterSpacing: "0.06em",
+                fontSize: "0.85rem",
+                textTransform: "uppercase",
+              }}
+            >
+              Total
+            </span>
+            <span
+              style={{
+                color: "#3a3028",
+                fontSize: "1.8rem",
+                fontWeight: "normal",
+                letterSpacing: "-0.02em",
               }}
             >
               {total.toFixed(2)}€
@@ -253,13 +337,7 @@ function TPV() {
           <select
             value={metodoPago}
             onChange={(e) => setMetodoPago(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "0.5rem",
-              borderRadius: "4px",
-              border: "none",
-              marginBottom: "0.75rem",
-            }}
+            style={{ width: "100%", marginBottom: "1rem" }}
           >
             <option value="EFECTIVO">Efectivo</option>
             <option value="TARJETA">Tarjeta</option>
@@ -268,17 +346,8 @@ function TPV() {
 
           <button
             onClick={cobrar}
-            style={{
-              width: "100%",
-              background: "#2d5016",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              padding: "1rem",
-              fontSize: "1.1rem",
-              cursor: "pointer",
-              fontWeight: "bold",
-            }}
+            className="btn-primary"
+            style={{ width: "100%", padding: "0.9rem", fontSize: "1rem" }}
           >
             Cobrar {total.toFixed(2)}€
           </button>
@@ -286,10 +355,11 @@ function TPV() {
           {mensaje && (
             <p
               style={{
-                color: "#69db7c",
+                color: "#6b7c4a",
                 textAlign: "center",
                 marginTop: "0.75rem",
-                fontSize: "0.9rem",
+                fontSize: "0.85rem",
+                fontStyle: "italic",
               }}
             >
               {mensaje}

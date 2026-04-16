@@ -9,7 +9,7 @@ function Eventos() {
   }, []);
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div className="page">
       <h1>Talleres y Eventos</h1>
 
       <div
@@ -22,19 +22,15 @@ function Eventos() {
         {eventos.map((e) => (
           <div
             key={e.id}
-            style={{
-              background: "#1a1a1a",
-              borderRadius: "8px",
-              padding: "1.5rem",
-              borderLeft: "4px solid #2d5016",
-            }}
+            className="card"
+            style={{ borderLeft: "4px solid #6b7c4a" }}
           >
-            <h3 style={{ color: "#f5e6d3", marginBottom: "0.5rem" }}>
+            <h2 style={{ marginBottom: "0.5rem", color: "#3a3028" }}>
               {e.nombre}
-            </h3>
+            </h2>
             <p
               style={{
-                color: "#aaa",
+                color: "#7a6a5a",
                 fontSize: "0.9rem",
                 marginBottom: "1rem",
               }}
@@ -45,11 +41,13 @@ function Eventos() {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                marginBottom: "0.5rem",
+                marginBottom: "0.4rem",
               }}
             >
-              <span style={{ color: "#aaa", fontSize: "0.85rem" }}>Fecha</span>
-              <span style={{ color: "white", fontSize: "0.85rem" }}>
+              <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                Fecha
+              </span>
+              <span style={{ color: "#3a3028", fontSize: "0.85rem" }}>
                 {new Date(e.fechaHora).toLocaleString("es-ES")}
               </span>
             </div>
@@ -57,16 +55,17 @@ function Eventos() {
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                marginBottom: "0.5rem",
+                marginBottom: "0.4rem",
               }}
             >
-              <span style={{ color: "#aaa", fontSize: "0.85rem" }}>
+              <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
                 Plazas disponibles
               </span>
               <span
                 style={{
-                  color: e.plazasDisponibles === 0 ? "#ff6b6b" : "#69db7c",
+                  color: e.plazasDisponibles === 0 ? "#c0392b" : "#6b7c4a",
                   fontSize: "0.85rem",
+                  fontWeight: "bold",
                 }}
               >
                 {e.plazasDisponibles} / {e.plazasTotales}
@@ -79,22 +78,14 @@ function Eventos() {
                 marginBottom: "1rem",
               }}
             >
-              <span style={{ color: "#aaa", fontSize: "0.85rem" }}>Precio</span>
-              <span style={{ color: "#f5e6d3", fontSize: "0.85rem" }}>
+              <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                Precio
+              </span>
+              <span style={{ color: "#3a3028", fontSize: "0.85rem" }}>
                 {e.precio}€
               </span>
             </div>
-            <span
-              style={{
-                background: "#2d5016",
-                color: "white",
-                padding: "0.2rem 0.6rem",
-                borderRadius: "12px",
-                fontSize: "0.8rem",
-              }}
-            >
-              {e.tipo}
-            </span>
+            <span className="badge badge-green">{e.tipo}</span>
           </div>
         ))}
       </div>

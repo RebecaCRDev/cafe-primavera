@@ -39,34 +39,20 @@ function Reservas() {
         setReservas(reservas.map((r) => (r.id === id ? res.data : r)));
         setMensaje("Reserva cancelada");
       })
-      .catch(() => setMensaje("Error al cancelar la reserva"));
+      .catch(() => setMensaje("Error al cancelar"));
   };
 
   return (
-    <div style={{ padding: "2rem" }}>
+    <div className="page">
       <h1>Reservas</h1>
 
-      <div
-        style={{
-          background: "#1a1a1a",
-          padding: "1.5rem",
-          borderRadius: "8px",
-          marginBottom: "2rem",
-        }}
-      >
-        <h2 style={{ color: "#f5e6d3", marginBottom: "1rem" }}>
-          Nueva reserva
-        </h2>
-        <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
+      <div className="card" style={{ marginBottom: "2rem" }}>
+        <h2 style={{ marginBottom: "1rem" }}>Nueva reserva</h2>
+        <div className="form-row">
           <select
             value={clienteId}
             onChange={(e) => setClienteId(e.target.value)}
-            style={{
-              padding: "0.5rem",
-              borderRadius: "4px",
-              border: "none",
-              flex: 1,
-            }}
+            style={{ flex: 1 }}
           >
             <option value="">Selecciona un cliente</option>
             {clientes.map((c) => (
@@ -78,12 +64,7 @@ function Reservas() {
           <select
             value={eventoId}
             onChange={(e) => setEventoId(e.target.value)}
-            style={{
-              padding: "0.5rem",
-              borderRadius: "4px",
-              border: "none",
-              flex: 1,
-            }}
+            style={{ flex: 1 }}
           >
             <option value="">Selecciona un taller</option>
             {eventos.map((e) => (
@@ -92,78 +73,53 @@ function Reservas() {
               </option>
             ))}
           </select>
-          <button
-            onClick={crearReserva}
-            style={{
-              background: "#2d5016",
-              color: "white",
-              padding: "0.5rem 1.5rem",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-            }}
-          >
+          <button className="btn-primary" onClick={crearReserva}>
             Reservar
           </button>
         </div>
         {mensaje && (
-          <p style={{ color: "#69db7c", marginTop: "0.5rem" }}>{mensaje}</p>
+          <p
+            style={{
+              color: "#6b7c4a",
+              marginTop: "0.75rem",
+              fontSize: "0.9rem",
+            }}
+          >
+            {mensaje}
+          </p>
         )}
       </div>
 
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table>
         <thead>
-          <tr style={{ background: "#2d5016", color: "white" }}>
-            <th style={{ padding: "0.75rem", textAlign: "left" }}>Cliente</th>
-            <th style={{ padding: "0.75rem", textAlign: "left" }}>Taller</th>
-            <th style={{ padding: "0.75rem", textAlign: "left" }}>
-              Fecha reserva
-            </th>
-            <th style={{ padding: "0.75rem", textAlign: "left" }}>Estado</th>
-            <th style={{ padding: "0.75rem", textAlign: "left" }}>Acción</th>
+          <tr>
+            <th>Cliente</th>
+            <th>Taller</th>
+            <th>Fecha reserva</th>
+            <th>Estado</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
-          {reservas.map((r, i) => (
-            <tr
-              key={r.id}
-              style={{ background: i % 2 === 0 ? "#1a1a1a" : "#222" }}
-            >
-              <td style={{ padding: "0.75rem", color: "white" }}>
-                {r.cliente?.nombre}
-              </td>
-              <td style={{ padding: "0.75rem", color: "#aaa" }}>
-                {r.evento?.nombre}
-              </td>
-              <td style={{ padding: "0.75rem", color: "#aaa" }}>
+          {reservas.map((r) => (
+            <tr key={r.id}>
+              <td>{r.cliente?.nombre || "—"}</td>
+              <td style={{ color: "#7a6a5a" }}>{r.evento?.nombre}</td>
+              <td style={{ color: "#7a6a5a" }}>
                 {new Date(r.fechaReserva).toLocaleString("es-ES")}
               </td>
-              <td style={{ padding: "0.75rem" }}>
+              <td>
                 <span
-                  style={{
-                    background:
-                      r.estado === "CANCELADA" ? "#5c1a1a" : "#2d5016",
-                    color: "white",
-                    padding: "0.2rem 0.6rem",
-                    borderRadius: "12px",
-                    fontSize: "0.8rem",
-                  }}
+                  className={`badge ${r.estado === "CANCELADA" ? "badge-red" : r.estado === "CONFIRMADA" ? "badge-green" : "badge-gray"}`}
                 >
                   {r.estado}
                 </span>
               </td>
-              <td style={{ padding: "0.75rem" }}>
+              <td>
                 {r.estado !== "CANCELADA" && (
                   <button
+                    className="btn-danger"
                     onClick={() => cancelarReserva(r.id)}
-                    style={{
-                      background: "#5c1a1a",
-                      color: "white",
-                      padding: "0.3rem 0.8rem",
-                      border: "none",
-                      borderRadius: "4px",
-                      cursor: "pointer",
-                    }}
                   >
                     Cancelar
                   </button>
