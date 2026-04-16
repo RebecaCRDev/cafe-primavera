@@ -48,4 +48,12 @@ public class EmpleadoController {
         empleadoService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/{id}/reset-password")
+    public ResponseEntity<Empleado> resetPassword(@PathVariable Integer id, @RequestParam String password) {
+        return empleadoService.findById(id).map(e -> {
+            e.setPasswordHash(password);
+            return ResponseEntity.ok(empleadoService.save(e));
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }

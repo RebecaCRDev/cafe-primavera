@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 
-function Navbar() {
+function Navbar({ usuario, onLogout }) {
   const location = useLocation();
 
   const linkStyle = (path) => ({
@@ -28,7 +28,7 @@ function Navbar() {
     >
       <div
         style={{
-          maxWidth: "1200px",
+          maxWidth: "1400px",
           margin: "0 auto",
           padding: "0 3rem",
           display: "flex",
@@ -49,6 +49,7 @@ function Navbar() {
             🌸 Café Primavera
           </span>
         </Link>
+
         <div style={{ display: "flex", gap: "2.5rem", alignItems: "center" }}>
           <Link to="/" style={linkStyle("/")}>
             TPV
@@ -65,6 +66,44 @@ function Navbar() {
           <Link to="/reservas" style={linkStyle("/reservas")}>
             Reservas
           </Link>
+          {usuario?.rol === "ADMIN" && (
+            <Link to="/empleados" style={linkStyle("/empleados")}>
+              Empleados
+            </Link>
+          )}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          <span style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+            {usuario?.nombre}
+            <span
+              style={{
+                marginLeft: "0.5rem",
+                background: "#e8f0e0",
+                color: "#4a6030",
+                padding: "0.1rem 0.5rem",
+                borderRadius: "10px",
+                fontSize: "0.75rem",
+              }}
+            >
+              {usuario?.rol}
+            </span>
+          </span>
+          <button
+            onClick={onLogout}
+            style={{
+              background: "none",
+              border: "1px solid #c8b89a",
+              borderRadius: "6px",
+              padding: "0.3rem 0.8rem",
+              color: "#7a6a5a",
+              fontSize: "0.8rem",
+              cursor: "pointer",
+              fontFamily: "Georgia, serif",
+            }}
+          >
+            Salir
+          </button>
         </div>
       </div>
     </nav>
