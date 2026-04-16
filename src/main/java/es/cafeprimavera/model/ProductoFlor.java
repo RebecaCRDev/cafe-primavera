@@ -17,7 +17,7 @@ public class ProductoFlor {
 
     private LocalDate fechaCaducidad;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "temporada")
     private String temporada = "TODO_AÑO";
 
     private String color;

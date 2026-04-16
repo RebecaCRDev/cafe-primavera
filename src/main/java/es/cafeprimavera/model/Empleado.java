@@ -19,7 +19,7 @@ public class Empleado {
     @Column(nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "rol")
     private String rol;
 
     @Column(nullable = false)

@@ -17,10 +17,10 @@ public class Pedido {
     @Column(nullable = false)
     private Double total = 0.0;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "metodo_pago")
     private String metodoPago;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "estado")
     private String estado = "ABIERTO";
 
     @ManyToOne

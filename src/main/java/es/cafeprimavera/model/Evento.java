@@ -28,7 +28,7 @@ public class Evento {
     @Column(nullable = false)
     private Double precio = 0.0;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "tipo")
     private String tipo;
 
     @ManyToOne

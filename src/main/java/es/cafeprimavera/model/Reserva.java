@@ -14,8 +14,8 @@ public class Reserva {
     @Column(nullable = false)
     private LocalDateTime fechaReserva = LocalDateTime.now();
 
-    @Column(nullable = false)
-    private String estado = "PENDIENTE";
+    @Column(nullable = false, name = "estado")
+    private String estado = "PENDIENTE";    
 
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)

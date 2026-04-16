@@ -33,14 +33,19 @@ public class ReservaService {
     }
 
     public Reserva save(Reserva reserva) {
-        Evento evento = reserva.getEvento();
-        if (evento.getPlazasDisponibles() <= 0) {
-            throw new RuntimeException("No hay plazas disponibles");
-        }
-        evento.setPlazasDisponibles(evento.getPlazasDisponibles() - 1);
-        eventoRepository.save(evento);
-        return reservaRepository.save(reserva);
+    Evento evento = eventoRepository.findById(reserva.getEvento().getId())
+        .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+    
+    if (evento.getPlazasDisponibles() <= 0) {
+        throw new RuntimeException("No hay plazas disponibles");
     }
+    
+    evento.setPlazasDisponibles(evento.getPlazasDisponibles() - 1);
+    eventoRepository.save(evento);
+    
+    reserva.setEvento(evento);
+    return reservaRepository.save(reserva);
+}
 
     public Reserva cancelar(Integer id) {
         Reserva reserva = reservaRepository.findById(id)
