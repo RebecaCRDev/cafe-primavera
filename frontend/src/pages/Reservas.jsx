@@ -29,7 +29,9 @@ function Reservas() {
         setEventoId("");
         setMensaje("Reserva creada correctamente");
       })
-      .catch(() => setMensaje("Error al crear la reserva"));
+      .catch((err) =>
+        setMensaje("Este cliente ya tiene una reserva activa para este taller"),
+      );
   };
 
   const cancelarReserva = (id) => {

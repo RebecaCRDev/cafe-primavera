@@ -35,17 +35,29 @@ public class ReservaService {
     public Reserva save(Reserva reserva) {
     Evento evento = eventoRepository.findById(reserva.getEvento().getId())
         .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
-    
+
+    // Idempotencia: evitar reserva duplicada del mismo cliente para el mismo evento
+    boolean yaReservado = reservaRepository
+        .findByCliente_IdAndEvento_IdAndEstadoNot(
+            reserva.getCliente().getId(),
+            evento.getId(),
+            "CANCELADA"
+        ).isPresent();
+
+    if (yaReservado) {
+        throw new RuntimeException("Este cliente ya tiene una reserva activa para este taller");
+    }
+
     if (evento.getPlazasDisponibles() <= 0) {
         throw new RuntimeException("No hay plazas disponibles");
     }
-    
+
     evento.setPlazasDisponibles(evento.getPlazasDisponibles() - 1);
     eventoRepository.save(evento);
-    
+
     reserva.setEvento(evento);
     return reservaRepository.save(reserva);
-}
+    }
 
     public Reserva cancelar(Integer id) {
         Reserva reserva = reservaRepository.findById(id)

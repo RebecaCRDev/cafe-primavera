@@ -49,15 +49,21 @@ public class PedidoService {
     }
 
     public Pedido cerrarPedido(Integer id, String metodoPago) {
-        Pedido pedido = pedidoRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
-        List<LineaPedido> lineas = lineaPedidoRepository.findByPedido_Id(id);
-        double total = lineas.stream()
-            .mapToDouble(l -> l.getPrecioUnitario() * l.getCantidad())
-            .sum();
-        pedido.setTotal(total);
-        pedido.setMetodoPago(metodoPago);
-        pedido.setEstado("PAGADO");
-        return pedidoRepository.save(pedido);
+    Pedido pedido = pedidoRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Pedido no encontrado"));
+
+    // Idempotencia: evitar cobro duplicado
+    if ("PAGADO".equals(pedido.getEstado())) {
+        return pedido;
     }
+
+    List<LineaPedido> lineas = lineaPedidoRepository.findByPedido_Id(id);
+    double total = lineas.stream()
+        .mapToDouble(l -> l.getPrecioUnitario() * l.getCantidad())
+        .sum();
+    pedido.setTotal(total);
+    pedido.setMetodoPago(metodoPago);
+    pedido.setEstado("PAGADO");
+    return pedidoRepository.save(pedido);
+}
 }
