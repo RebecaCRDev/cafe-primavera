@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import "./App.css";
+import { CarritoProvider } from "./context/CarritoContext";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import TPV from "./pages/TPV";
@@ -9,6 +10,7 @@ import Clientes from "./pages/Clientes";
 import Eventos from "./pages/Eventos";
 import Reservas from "./pages/Reservas";
 import Empleados from "./pages/Empleados";
+import Appcc from "./pages/Appcc";
 
 function App() {
   const [usuario, setUsuario] = useState(
@@ -31,20 +33,23 @@ function App() {
 
   return (
     <BrowserRouter>
-      <Navbar usuario={usuario} onLogout={handleLogout} />
-      <Routes>
-        <Route path="/" element={<TPV />} />
-        <Route path="/productos" element={<Productos />} />
-        <Route path="/clientes" element={<Clientes />} />
-        <Route path="/eventos" element={<Eventos />} />
-        <Route path="/reservas" element={<Reservas />} />
-        <Route
-          path="/empleados"
-          element={
-            usuario.rol === "ADMIN" ? <Empleados /> : <Navigate to="/" />
-          }
-        />
-      </Routes>
+      <CarritoProvider>
+        <Navbar usuario={usuario} onLogout={handleLogout} />
+        <Routes>
+          <Route path="/" element={<TPV />} />
+          <Route path="/productos" element={<Productos />} />
+          <Route path="/clientes" element={<Clientes />} />
+          <Route path="/eventos" element={<Eventos />} />
+          <Route path="/reservas" element={<Reservas />} />
+          <Route path="/appcc" element={<Appcc />} />
+          <Route
+            path="/empleados"
+            element={
+              usuario.rol === "ADMIN" ? <Empleados /> : <Navigate to="/" />
+            }
+          />
+        </Routes>
+      </CarritoProvider>
     </BrowserRouter>
   );
 }

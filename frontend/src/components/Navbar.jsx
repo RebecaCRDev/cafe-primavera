@@ -66,6 +66,9 @@ function Navbar({ usuario, onLogout }) {
           <Link to="/reservas" style={linkStyle("/reservas")}>
             Reservas
           </Link>
+          <Link to="/appcc" style={linkStyle("/appcc")}>
+            APPCC
+          </Link>
           {usuario?.rol === "ADMIN" && (
             <Link to="/empleados" style={linkStyle("/empleados")}>
               Empleados

@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
+import { useCarrito } from "../context/CarritoContext";
 
 function TPV() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [filtro, setFiltro] = useState("");
-  const [carrito, setCarrito] = useState([]);
   const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   const [mensaje, setMensaje] = useState("");
+
+  const { carrito, añadirAlCarrito, quitarDelCarrito, vaciarCarrito, total } =
+    useCarrito();
 
   useEffect(() => {
     api.get("/productos/activos").then((res) => setProductos(res.data));
@@ -17,41 +20,6 @@ function TPV() {
   const productosFiltrados = filtro
     ? productos.filter((p) => p.categoria?.id === parseInt(filtro))
     : productos;
-
-  const añadirAlCarrito = (producto) => {
-    const existe = carrito.find((item) => item.producto.id === producto.id);
-    if (existe) {
-      setCarrito(
-        carrito.map((item) =>
-          item.producto.id === producto.id
-            ? { ...item, cantidad: item.cantidad + 1 }
-            : item,
-        ),
-      );
-    } else {
-      setCarrito([...carrito, { producto, cantidad: 1 }]);
-    }
-  };
-
-  const quitarDelCarrito = (productoId) => {
-    const existe = carrito.find((item) => item.producto.id === productoId);
-    if (existe.cantidad === 1) {
-      setCarrito(carrito.filter((item) => item.producto.id !== productoId));
-    } else {
-      setCarrito(
-        carrito.map((item) =>
-          item.producto.id === productoId
-            ? { ...item, cantidad: item.cantidad - 1 }
-            : item,
-        ),
-      );
-    }
-  };
-
-  const total = carrito.reduce(
-    (sum, item) => sum + item.producto.precio * item.cantidad,
-    0,
-  );
 
   const cobrar = async () => {
     if (carrito.length === 0) return setMensaje("El carrito está vacío");
@@ -71,7 +39,7 @@ function TPV() {
       await api.patch(
         `/pedidos/${pedido.data.id}/cerrar?metodoPago=${metodoPago}`,
       );
-      setCarrito([]);
+      vaciarCarrito();
       setMensaje(`Pedido #${pedido.data.id} cobrado correctamente`);
     } catch (e) {
       setMensaje("Error al procesar el pedido");
@@ -166,7 +134,13 @@ function TPV() {
               >
                 {p.nombre}
               </div>
-              <div style={{ color: "#6b7c4a", fontSize: "1.4rem" }}>
+              <div
+                style={{
+                  color: "#6b7c4a",
+                  fontSize: "1.4rem",
+                  marginBottom: "0.3rem",
+                }}
+              >
                 {p.precio}€
               </div>
               <div
