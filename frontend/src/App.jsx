@@ -11,6 +11,8 @@ import Eventos from "./pages/Eventos";
 import Reservas from "./pages/Reservas";
 import Empleados from "./pages/Empleados";
 import Appcc from "./pages/Appcc";
+import Salon from "./pages/Salon";
+import Carta from "./pages/Carta";
 
 function App() {
   const [usuario, setUsuario] = useState(
@@ -42,6 +44,8 @@ function App() {
           <Route path="/eventos" element={<Eventos />} />
           <Route path="/reservas" element={<Reservas />} />
           <Route path="/appcc" element={<Appcc />} />
+          <Route path="/salon" element={<Salon />} />
+          <Route path="/carta" element={<Carta />} />
           <Route
             path="/empleados"
             element={

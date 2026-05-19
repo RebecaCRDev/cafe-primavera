@@ -6,6 +6,7 @@ import es.cafeprimavera.service.PedidoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/pedidos")
@@ -62,5 +63,19 @@ public class PedidoController {
     public ResponseEntity<Pedido> cerrar(@PathVariable Integer id,
                                           @RequestParam String metodoPago) {
         return ResponseEntity.ok(pedidoService.cerrarPedido(id, metodoPago));
+    }
+
+    @PatchMapping("/{id}/cancelar")
+    public ResponseEntity<Pedido> cancelar(@PathVariable Integer id,
+                                            @RequestBody Map<String, String> body) {
+        String motivo = body.getOrDefault("motivo", "Sin motivo especificado");
+        return ResponseEntity.ok(pedidoService.cancelarPedido(id, motivo));
+    }
+
+    @GetMapping("/mesa/{mesaId}")
+    public ResponseEntity<?> getByMesa(@PathVariable Integer mesaId) {
+        return pedidoService.findByMesaAndEstado(mesaId, "ABIERTO")
+            .map(ResponseEntity::ok)
+            .orElse(ResponseEntity.ok(null));
     }
 }

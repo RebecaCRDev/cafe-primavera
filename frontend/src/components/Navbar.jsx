@@ -54,6 +54,12 @@ function Navbar({ usuario, onLogout }) {
           <Link to="/" style={linkStyle("/")}>
             TPV
           </Link>
+          <Link to="/carta" style={linkStyle("/carta")}>
+            Carta
+          </Link>
+          <Link to="/salon" style={linkStyle("/salon")}>
+            Salón
+          </Link>
           <Link to="/productos" style={linkStyle("/productos")}>
             Productos
           </Link>

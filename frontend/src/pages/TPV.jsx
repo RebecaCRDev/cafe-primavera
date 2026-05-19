@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import { useCarrito } from "../context/CarritoContext";
 
@@ -8,14 +9,35 @@ function TPV() {
   const [filtro, setFiltro] = useState("");
   const [metodoPago, setMetodoPago] = useState("EFECTIVO");
   const [mensaje, setMensaje] = useState("");
+  const [pedidoActivo, setPedidoActivo] = useState(null);
 
+  const [searchParams] = useSearchParams();
+  const mesaId = searchParams.get("mesaId");
+  const mesaNumero = searchParams.get("mesaNumero");
+  const pedidoIdParam = searchParams.get("pedidoId");
+
+  const usuario = JSON.parse(localStorage.getItem("usuario"));
   const { carrito, añadirAlCarrito, quitarDelCarrito, vaciarCarrito, total } =
     useCarrito();
 
   useEffect(() => {
     api.get("/productos/activos").then((res) => setProductos(res.data));
     api.get("/categorias").then((res) => setCategorias(res.data));
-  }, []);
+
+    if (pedidoIdParam) {
+      api
+        .get(`/pedidos/${pedidoIdParam}`)
+        .then((res) => setPedidoActivo(res.data))
+        .catch(() => {});
+    } else if (mesaId) {
+      api
+        .get(`/pedidos/mesa/${mesaId}`)
+        .then((res) => {
+          if (res.data) setPedidoActivo(res.data);
+        })
+        .catch(() => {});
+    }
+  }, [mesaId, pedidoIdParam]);
 
   const productosFiltrados = filtro
     ? productos.filter((p) => p.categoria?.id === parseInt(filtro))
@@ -24,23 +46,31 @@ function TPV() {
   const cobrar = async () => {
     if (carrito.length === 0) return setMensaje("El carrito está vacío");
     try {
-      const pedido = await api.post("/pedidos", {
-        metodoPago,
-        estado: "ABIERTO",
-        empleado: { id: 1 },
-      });
+      let pedidoId = pedidoIdParam || pedidoActivo?.id;
+
+      if (!pedidoId) {
+        const body = {
+          metodoPago,
+          estado: "ABIERTO",
+          empleado: { id: usuario?.id || 1 },
+        };
+        if (mesaId) body.mesa = { id: parseInt(mesaId) };
+        const pedido = await api.post("/pedidos", body);
+        pedidoId = pedido.data.id;
+      }
+
       for (const item of carrito) {
-        await api.post(`/pedidos/${pedido.data.id}/lineas`, {
+        await api.post(`/pedidos/${pedidoId}/lineas`, {
           cantidad: item.cantidad,
           precioUnitario: item.producto.precio,
           producto: { id: item.producto.id },
         });
       }
-      await api.patch(
-        `/pedidos/${pedido.data.id}/cerrar?metodoPago=${metodoPago}`,
-      );
+
+      await api.patch(`/pedidos/${pedidoId}/cerrar?metodoPago=${metodoPago}`);
       vaciarCarrito();
-      setMensaje(`Pedido #${pedido.data.id} cobrado correctamente`);
+      setPedidoActivo(null);
+      setMensaje(`Pedido #${pedidoId} cobrado correctamente`);
     } catch (e) {
       setMensaje("Error al procesar el pedido");
     }
@@ -55,7 +85,7 @@ function TPV() {
         overflow: "hidden",
       }}
     >
-      {/* Panel izquierdo - Productos */}
+      {/* Panel izquierdo */}
       <div
         style={{
           flex: 1,
@@ -71,7 +101,12 @@ function TPV() {
             letterSpacing: "0.06em",
           }}
         >
-          Productos
+          Productos{" "}
+          {mesaNumero && (
+            <span style={{ color: "#6b7c4a", fontSize: "1rem" }}>
+              — Mesa {mesaNumero}
+            </span>
+          )}
         </h2>
 
         <select
@@ -176,8 +211,24 @@ function TPV() {
             letterSpacing: "0.06em",
           }}
         >
-          Pedido actual
+          {mesaNumero ? `Mesa ${mesaNumero}` : "Pedido actual"}
         </h2>
+
+        {pedidoActivo && (
+          <div
+            style={{
+              background: "#f0f7e8",
+              border: "1px solid #6b7c4a",
+              borderRadius: "6px",
+              padding: "0.5rem 0.75rem",
+              marginBottom: "1rem",
+              fontSize: "0.8rem",
+              color: "#4a6030",
+            }}
+          >
+            Pedido #{pedidoActivo.id} abierto
+          </div>
+        )}
 
         <div style={{ flex: 1, overflowY: "auto" }}>
           {carrito.length === 0 ? (
@@ -301,7 +352,6 @@ function TPV() {
                 color: "#3a3028",
                 fontSize: "1.8rem",
                 fontWeight: "normal",
-                letterSpacing: "-0.02em",
               }}
             >
               {total.toFixed(2)}€

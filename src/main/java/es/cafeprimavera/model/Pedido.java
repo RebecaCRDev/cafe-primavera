@@ -31,6 +31,13 @@ public class Pedido {
     @JoinColumn(name = "empleado_id", nullable = false)
     private Empleado empleado;
 
+    @ManyToOne
+    @JoinColumn(name = "mesa_id")
+    private Mesa mesa;
+
+    @Column(name = "motivo_cancelacion")
+    private String motivoCancelacion;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public LocalDateTime getFecha() { return fecha; }
@@ -45,4 +52,8 @@ public class Pedido {
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
     public Empleado getEmpleado() { return empleado; }
     public void setEmpleado(Empleado empleado) { this.empleado = empleado; }
+    public Mesa getMesa() { return mesa; }
+    public void setMesa(Mesa mesa) { this.mesa = mesa; }
+    public String getMotivoCancelacion() { return motivoCancelacion; }
+    public void setMotivoCancelacion(String motivoCancelacion) { this.motivoCancelacion = motivoCancelacion; }
 }
