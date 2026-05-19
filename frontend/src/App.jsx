@@ -4,33 +4,46 @@ import "./App.css";
 import { CarritoProvider } from "./context/CarritoContext";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Salon from "./pages/Salon";
 import TPV from "./pages/TPV";
+import Carta from "./pages/Carta";
 import Productos from "./pages/Productos";
 import Clientes from "./pages/Clientes";
 import Eventos from "./pages/Eventos";
 import Reservas from "./pages/Reservas";
-import Empleados from "./pages/Empleados";
 import Appcc from "./pages/Appcc";
-import Salon from "./pages/Salon";
-import Carta from "./pages/Carta";
+import Empleados from "./pages/Empleados";
 
 function App() {
   const [usuario, setUsuario] = useState(
     JSON.parse(localStorage.getItem("usuario")) || null,
   );
+  const [mostrarDashboard, setMostrarDashboard] = useState(false);
 
   const handleLogin = (datos) => {
     localStorage.setItem("usuario", JSON.stringify(datos));
     setUsuario(datos);
+    setMostrarDashboard(true);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("usuario");
     setUsuario(null);
+    setMostrarDashboard(false);
   };
 
   if (!usuario) {
     return <Login onLogin={handleLogin} />;
+  }
+
+  if (mostrarDashboard) {
+    return (
+      <Dashboard
+        usuario={usuario}
+        onEntrar={() => setMostrarDashboard(false)}
+      />
+    );
   }
 
   return (
@@ -38,14 +51,14 @@ function App() {
       <CarritoProvider>
         <Navbar usuario={usuario} onLogout={handleLogout} />
         <Routes>
-          <Route path="/" element={<TPV />} />
+          <Route path="/" element={<Salon />} />
+          <Route path="/carta" element={<Carta />} />
+          <Route path="/tpv" element={<TPV />} />
           <Route path="/productos" element={<Productos />} />
           <Route path="/clientes" element={<Clientes />} />
           <Route path="/eventos" element={<Eventos />} />
           <Route path="/reservas" element={<Reservas />} />
           <Route path="/appcc" element={<Appcc />} />
-          <Route path="/salon" element={<Salon />} />
-          <Route path="/carta" element={<Carta />} />
           <Route
             path="/empleados"
             element={
