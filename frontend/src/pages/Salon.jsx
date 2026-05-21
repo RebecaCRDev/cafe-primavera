@@ -1,25 +1,15 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
-const CATEGORIAS_ORDEN = [
-  "Cafetería e infusiones",
-  "Té frío",
-  "Dulces",
-  "Brownies",
-  "Rolls",
-  "Salados",
-  "Desayunos",
-  "Ramos y arreglos",
-  "Flores sueltas",
-  "Packs regalo",
-];
-
 function Salon() {
+  const [nombreReserva, setNombreReserva] = useState("");
+  const [horaReserva, setHoraReserva] = useState("");
+  const [personasReserva, setPersonasReserva] = useState("");
   const [mesas, setMesas] = useState([]);
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [filtroCategoria, setFiltroCategoria] = useState("");
-  const [modal, setModal] = useState(null); // null | 'opciones' | 'pedido' | 'reservada' | 'cancelar'
+  const [modal, setModal] = useState(null);
   const [mesaActiva, setMesaActiva] = useState(null);
   const [pedidoActivo, setPedidoActivo] = useState(null);
   const [lineasPedido, setLineasPedido] = useState([]);
@@ -106,11 +96,24 @@ function Salon() {
   };
 
   const reservarMesa = async () => {
-    const res = await api.patch(
-      `/mesas/${mesaActiva.id}/estado?estado=RESERVADA`,
-    );
-    setMesas(mesas.map((m) => (m.id === mesaActiva.id ? res.data : m)));
-    cerrarModal();
+    if (!nombreReserva || !personasReserva) {
+      setMensaje("Introduce nombre y número de personas");
+      return;
+    }
+    try {
+      const res = await api.patch(`/mesas/${mesaActiva.id}/reservar`, {
+        nombreReserva,
+        horaReserva,
+        personasReserva: String(personasReserva),
+      });
+      setMesas(mesas.map((m) => (m.id === mesaActiva.id ? res.data : m)));
+      setNombreReserva("");
+      setHoraReserva("");
+      setPersonasReserva("");
+      cerrarModal();
+    } catch {
+      setMensaje("Error al reservar la mesa");
+    }
   };
 
   const confirmarReserva = async () => {
@@ -190,7 +193,6 @@ function Salon() {
 
   const cancelarPedido = async () => {
     if (!pedidoActivo) {
-      // Si no hay pedido, solo liberar la mesa
       await api.patch(`/mesas/${mesaActiva.id}/estado?estado=LIBRE`);
       cargarMesas();
       cerrarModal();
@@ -344,7 +346,9 @@ function Salon() {
 
       {/* Mapa */}
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <div style={{ position: "relative", width: "700px" }}>
+        <div
+          style={{ position: "relative", width: "700px", minHeight: "620px" }}
+        >
           {/* Terraza */}
           <div
             style={{
@@ -416,7 +420,6 @@ function Salon() {
             >
               🏠 Interior
             </span>
-
             <div
               style={{
                 position: "absolute",
@@ -444,13 +447,11 @@ function Salon() {
                 ☕ Barra
               </span>
             </div>
-
             <SillaBarra numero="B1" top="38px" left="588px" />
             <SillaBarra numero="B2" top="82px" left="588px" />
             <SillaBarra numero="B3" top="126px" left="588px" />
             <SillaBarra numero="B4" top="170px" left="588px" />
             <SillaBarra numero="B5" top="214px" left="588px" />
-
             <div
               style={{
                 position: "absolute",
@@ -473,7 +474,6 @@ function Salon() {
               <br />
               talleres
             </div>
-
             <Mesa numero="I1" top="50px" left="50px" />
             <Mesa numero="I2" top="50px" left="130px" />
             <Mesa numero="I3" top="50px" left="210px" />
@@ -512,7 +512,7 @@ function Salon() {
               background: "#fff",
               borderRadius: "16px",
               padding: "2rem",
-              width: "320px",
+              width: "360px",
               boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -529,49 +529,104 @@ function Salon() {
             >
               ¿Qué quieres hacer con esta mesa?
             </p>
-            <div
+            <button
+              className="btn-primary"
+              onClick={ocuparMesa}
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
+                width: "100%",
+                padding: "0.85rem",
+                marginBottom: "1rem",
               }}
             >
-              <button
-                className="btn-primary"
-                onClick={ocuparMesa}
-                style={{ padding: "0.85rem" }}
+              🪑 Ocupar mesa
+            </button>
+            <div style={{ borderTop: "1px solid #e8ddd0", paddingTop: "1rem" }}>
+              <p
+                style={{
+                  color: "#7a6a5a",
+                  fontSize: "0.85rem",
+                  marginBottom: "0.75rem",
+                  fontWeight: "bold",
+                }}
               >
-                🪑 Ocupar mesa
-              </button>
+                📅 Reservar mesa
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.6rem",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                <input
+                  placeholder="Nombre del cliente *"
+                  value={nombreReserva}
+                  onChange={(e) => setNombreReserva(e.target.value)}
+                  style={{ fontSize: "0.9rem" }}
+                />
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  <input
+                    type="time"
+                    value={horaReserva}
+                    onChange={(e) => setHoraReserva(e.target.value)}
+                    style={{ flex: 1, fontSize: "0.9rem" }}
+                  />
+                  <input
+                    type="number"
+                    placeholder="Personas *"
+                    min="1"
+                    max="10"
+                    value={personasReserva}
+                    onChange={(e) => setPersonasReserva(e.target.value)}
+                    style={{ flex: 1, fontSize: "0.9rem" }}
+                  />
+                </div>
+              </div>
+              {mensaje && (
+                <p
+                  style={{
+                    color: "#c0392b",
+                    fontSize: "0.8rem",
+                    marginBottom: "0.5rem",
+                  }}
+                >
+                  {mensaje}
+                </p>
+              )}
               <button
                 onClick={reservarMesa}
                 style={{
+                  width: "100%",
                   background: "#fef3e2",
                   border: "1px solid #e67e22",
                   color: "#e67e22",
                   borderRadius: "6px",
-                  padding: "0.85rem",
-                  cursor: "pointer",
-                  fontFamily: "Georgia, serif",
-                }}
-              >
-                📅 Reservar mesa
-              </button>
-              <button
-                onClick={cerrarModal}
-                style={{
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
                   padding: "0.75rem",
                   cursor: "pointer",
-                  color: "#7a6a5a",
                   fontFamily: "Georgia, serif",
+                  fontSize: "0.9rem",
                 }}
               >
-                Cancelar
+                Confirmar reserva
               </button>
             </div>
+            <button
+              onClick={cerrarModal}
+              style={{
+                width: "100%",
+                background: "#f0ece8",
+                border: "none",
+                borderRadius: "6px",
+                padding: "0.75rem",
+                cursor: "pointer",
+                color: "#7a6a5a",
+                fontFamily: "Georgia, serif",
+                marginTop: "0.75rem",
+              }}
+            >
+              Cancelar
+            </button>
           </div>
         </div>
       )}
@@ -631,6 +686,20 @@ function Salon() {
               }}
             >
               <button
+                onClick={() => setModal("verReserva")}
+                style={{
+                  background: "#fef3e2",
+                  border: "1px solid #e67e22",
+                  color: "#e67e22",
+                  borderRadius: "6px",
+                  padding: "0.85rem",
+                  cursor: "pointer",
+                  fontFamily: "Georgia, serif",
+                }}
+              >
+                👁 Ver datos de la reserva
+              </button>
+              <button
                 className="btn-primary"
                 onClick={confirmarReserva}
                 style={{ padding: "0.85rem" }}
@@ -663,6 +732,112 @@ function Salon() {
         </div>
       )}
 
+      {/* MODAL VER RESERVA */}
+      {modal === "verReserva" && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1001,
+          }}
+          onClick={() => setModal("reservada")}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "16px",
+              padding: "2rem",
+              width: "340px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ marginBottom: "1.5rem" }}>Datos de la reserva</h2>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "1rem",
+                marginBottom: "1.5rem",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  borderBottom: "1px solid #f0e8dc",
+                  paddingBottom: "0.75rem",
+                }}
+              >
+                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                  Mesa
+                </span>
+                <span style={{ color: "#3a3028", fontWeight: "bold" }}>
+                  {mesaActiva?.numero}
+                </span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  borderBottom: "1px solid #f0e8dc",
+                  paddingBottom: "0.75rem",
+                }}
+              >
+                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                  Nombre
+                </span>
+                <span style={{ color: "#3a3028" }}>
+                  {mesaActiva?.nombreReserva || "—"}
+                </span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  borderBottom: "1px solid #f0e8dc",
+                  paddingBottom: "0.75rem",
+                }}
+              >
+                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                  Hora prevista
+                </span>
+                <span style={{ color: "#3a3028" }}>
+                  {mesaActiva?.horaReserva || "—"}
+                </span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                  Personas
+                </span>
+                <span style={{ color: "#3a3028" }}>
+                  {mesaActiva?.personasReserva || "—"}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setModal("reservada")}
+              style={{
+                width: "100%",
+                background: "#f0ece8",
+                border: "none",
+                borderRadius: "6px",
+                padding: "0.75rem",
+                cursor: "pointer",
+                color: "#7a6a5a",
+                fontFamily: "Georgia, serif",
+              }}
+            >
+              Volver
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* MODAL PEDIDO - Mesa ocupada */}
       {modal === "pedido" && (
         <div
@@ -690,7 +865,6 @@ function Salon() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Panel izquierdo - Productos */}
             <div
               style={{
                 flex: 1,
@@ -767,8 +941,6 @@ function Salon() {
                 ))}
               </div>
             </div>
-
-            {/* Panel derecho - Pedido */}
             <div
               style={{
                 width: "300px",
@@ -799,7 +971,6 @@ function Salon() {
                   OCUPADA
                 </span>
               </div>
-
               {cargando && (
                 <p
                   style={{
@@ -811,7 +982,6 @@ function Salon() {
                   Cargando...
                 </p>
               )}
-
               <div style={{ flex: 1, overflowY: "auto" }}>
                 {lineasPedido.length === 0 ? (
                   <p
@@ -896,7 +1066,6 @@ function Salon() {
                   ))
                 )}
               </div>
-
               <div
                 style={{
                   borderTop: "1px solid #e8ddd0",
@@ -924,7 +1093,6 @@ function Salon() {
                     {totalPedido.toFixed(2)}€
                   </span>
                 </div>
-
                 <select
                   value={metodoPago}
                   onChange={(e) => setMetodoPago(e.target.value)}
@@ -938,7 +1106,6 @@ function Salon() {
                   <option value="TARJETA">Tarjeta</option>
                   <option value="BIZUM">Bizum</option>
                 </select>
-
                 <button
                   onClick={cobrar}
                   className="btn-primary"
@@ -950,7 +1117,6 @@ function Salon() {
                 >
                   Cobrar {totalPedido.toFixed(2)}€
                 </button>
-
                 <button
                   onClick={() => setModal("cancelar")}
                   className="btn-danger"
@@ -958,7 +1124,6 @@ function Salon() {
                 >
                   Cancelar / Invitar
                 </button>
-
                 {mensaje && (
                   <p
                     style={{

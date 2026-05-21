@@ -5,6 +5,7 @@ import es.cafeprimavera.service.MesaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/mesas")
@@ -37,5 +38,13 @@ public class MesaController {
     @PatchMapping("/{id}/estado")
     public ResponseEntity<Mesa> cambiarEstado(@PathVariable Integer id, @RequestParam String estado) {
         return ResponseEntity.ok(mesaService.cambiarEstado(id, estado));
+    }
+
+    @PatchMapping("/{id}/reservar")
+    public ResponseEntity<Mesa> reservar(@PathVariable Integer id, @RequestBody Map<String, String> body) {
+        String nombre = body.get("nombreReserva");
+        String hora = body.get("horaReserva");
+        Integer personas = body.get("personasReserva") != null ? Integer.parseInt(body.get("personasReserva")) : null;
+        return ResponseEntity.ok(mesaService.reservar(id, nombre, hora, personas));
     }
 }

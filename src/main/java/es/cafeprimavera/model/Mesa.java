@@ -22,6 +22,15 @@ public class Mesa {
     @Column(nullable = false)
     private String estado = "LIBRE";
 
+    @Column(name = "nombre_reserva", length = 150)
+    private String nombreReserva;
+
+    @Column(name = "hora_reserva", length = 10)
+    private String horaReserva;
+
+    @Column(name = "personas_reserva")
+    private Integer personasReserva;
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getNumero() { return numero; }
@@ -32,4 +41,10 @@ public class Mesa {
     public void setCapacidad(Integer capacidad) { this.capacidad = capacidad; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+    public String getNombreReserva() { return nombreReserva; }
+    public void setNombreReserva(String nombreReserva) { this.nombreReserva = nombreReserva; }
+    public String getHoraReserva() { return horaReserva; }
+    public void setHoraReserva(String horaReserva) { this.horaReserva = horaReserva; }
+    public Integer getPersonasReserva() { return personasReserva; }
+    public void setPersonasReserva(Integer personasReserva) { this.personasReserva = personasReserva; }
 }

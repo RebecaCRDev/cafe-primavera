@@ -5,6 +5,7 @@ import es.cafeprimavera.service.ProductoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/productos")
@@ -57,6 +58,16 @@ public class ProductoController {
     public ResponseEntity<Producto> updateStock(@PathVariable Integer id,
                                                  @RequestParam Integer cantidad) {
         return ResponseEntity.ok(productoService.actualizarStock(id, cantidad));
+    }
+
+    @PatchMapping("/{id}/gestionar-stock")
+    public ResponseEntity<Producto> gestionarStock(@PathVariable Integer id,
+                                                     @RequestBody Map<String, String> body) {
+        String tipo = body.get("tipo");
+        Integer cantidad = Integer.parseInt(body.get("cantidad"));
+        String motivo = body.getOrDefault("motivo", "");
+        Integer empleadoId = Integer.parseInt(body.getOrDefault("empleadoId", "1"));
+        return ResponseEntity.ok(productoService.gestionarStock(id, tipo, cantidad, motivo, empleadoId));
     }
 
     @DeleteMapping("/{id}")

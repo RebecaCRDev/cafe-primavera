@@ -51,7 +51,8 @@ function App() {
       <CarritoProvider>
         <Navbar usuario={usuario} onLogout={handleLogout} />
         <Routes>
-          <Route path="/" element={<Salon />} />
+          <Route path="/" element={<Navigate to="/salon" />} />
+          <Route path="/salon" element={<Salon />} />
           <Route path="/carta" element={<Carta />} />
           <Route path="/tpv" element={<TPV />} />
           <Route path="/productos" element={<Productos />} />

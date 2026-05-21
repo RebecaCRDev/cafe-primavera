@@ -37,7 +37,7 @@ function Navbar({ usuario, onLogout }) {
           height: "64px",
         }}
       >
-        <Link to="/" style={{ textDecoration: "none" }}>
+        <Link to="/salon" style={{ textDecoration: "none" }}>
           <span
             style={{
               color: "#6b7c4a",
@@ -51,26 +51,14 @@ function Navbar({ usuario, onLogout }) {
         </Link>
 
         <div style={{ display: "flex", gap: "2.5rem", alignItems: "center" }}>
-          <Link to="/" style={linkStyle("/")}>
-            TPV
-          </Link>
-          <Link to="/carta" style={linkStyle("/carta")}>
-            Carta
-          </Link>
           <Link to="/salon" style={linkStyle("/salon")}>
             Salón
           </Link>
           <Link to="/productos" style={linkStyle("/productos")}>
-            Productos
-          </Link>
-          <Link to="/clientes" style={linkStyle("/clientes")}>
-            Clientes
+            Inventario
           </Link>
           <Link to="/eventos" style={linkStyle("/eventos")}>
             Talleres
-          </Link>
-          <Link to="/reservas" style={linkStyle("/reservas")}>
-            Reservas
           </Link>
           <Link to="/appcc" style={linkStyle("/appcc")}>
             APPCC
