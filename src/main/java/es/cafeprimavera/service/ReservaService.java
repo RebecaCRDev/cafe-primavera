@@ -33,30 +33,33 @@ public class ReservaService {
     }
 
     public Reserva save(Reserva reserva) {
-    Evento evento = eventoRepository.findById(reserva.getEvento().getId())
-        .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
+        Evento evento = eventoRepository.findById(reserva.getEvento().getId())
+            .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
-    // Idempotencia: evitar reserva duplicada del mismo cliente para el mismo evento
-    boolean yaReservado = reservaRepository
-        .findByCliente_IdAndEvento_IdAndEstadoNot(
-            reserva.getCliente().getId(),
-            evento.getId(),
-            "CANCELADA"
-        ).isPresent();
+        int numPersonas = reserva.getNumPersonas() != null ? reserva.getNumPersonas() : 1;
 
-    if (yaReservado) {
-        throw new RuntimeException("Este cliente ya tiene una reserva activa para este taller");
-    }
+        // Idempotencia: evitar reserva duplicada del mismo cliente para el mismo evento
+        boolean yaReservado = reservaRepository
+            .findByCliente_IdAndEvento_IdAndEstadoNot(
+                reserva.getCliente().getId(),
+                evento.getId(),
+                "CANCELADA"
+            ).isPresent();
 
-    if (evento.getPlazasDisponibles() <= 0) {
-        throw new RuntimeException("No hay plazas disponibles");
-    }
+        if (yaReservado) {
+            throw new RuntimeException("Este cliente ya tiene una reserva activa para este taller");
+        }
 
-    evento.setPlazasDisponibles(evento.getPlazasDisponibles() - 1);
-    eventoRepository.save(evento);
+        if (evento.getPlazasDisponibles() < numPersonas) {
+            throw new RuntimeException("No hay suficientes plazas disponibles. Quedan " + evento.getPlazasDisponibles() + " plazas.");
+        }
 
-    reserva.setEvento(evento);
-    return reservaRepository.save(reserva);
+        evento.setPlazasDisponibles(evento.getPlazasDisponibles() - numPersonas);
+        eventoRepository.save(evento);
+
+        reserva.setNumPersonas(numPersonas);
+        reserva.setEvento(evento);
+        return reservaRepository.save(reserva);
     }
 
     public Reserva cancelar(Integer id) {
@@ -64,7 +67,8 @@ public class ReservaService {
             .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
         reserva.setEstado("CANCELADA");
         Evento evento = reserva.getEvento();
-        evento.setPlazasDisponibles(evento.getPlazasDisponibles() + 1);
+        int numPersonas = reserva.getNumPersonas() != null ? reserva.getNumPersonas() : 1;
+        evento.setPlazasDisponibles(evento.getPlazasDisponibles() + numPersonas);
         eventoRepository.save(evento);
         return reservaRepository.save(reserva);
     }

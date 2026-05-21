@@ -14,6 +14,7 @@ function Salon() {
   const [pedidoActivo, setPedidoActivo] = useState(null);
   const [lineasPedido, setLineasPedido] = useState([]);
   const [metodoPago, setMetodoPago] = useState("EFECTIVO");
+  const [importeEntregado, setImporteEntregado] = useState("");
   const [motivoCancelacion, setMotivoCancelacion] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
@@ -37,12 +38,13 @@ function Salon() {
     setMesaActiva(mesa);
     setMensaje("");
     setMotivoCancelacion("");
+    setImporteEntregado("");
+    setMetodoPago("EFECTIVO");
 
     if (mesa.estado === "LIBRE") {
       setModal("opciones");
       return;
     }
-
     if (mesa.estado === "RESERVADA") {
       setModal("reservada");
       return;
@@ -76,6 +78,8 @@ function Salon() {
     setLineasPedido([]);
     setMensaje("");
     setFiltroCategoria("");
+    setImporteEntregado("");
+    setMetodoPago("EFECTIVO");
   };
 
   const ocuparMesa = async () => {
@@ -180,6 +184,11 @@ function Salon() {
   const cobrar = async () => {
     if (!pedidoActivo || lineasPedido.length === 0)
       return setMensaje("No hay productos en el pedido");
+    if (
+      metodoPago === "EFECTIVO" &&
+      (!importeEntregado || parseFloat(importeEntregado) < totalPedido)
+    )
+      return setMensaje("El importe entregado debe ser igual o mayor al total");
     try {
       await api.patch(
         `/pedidos/${pedidoActivo.id}/cerrar?metodoPago=${metodoPago}`,
@@ -213,6 +222,9 @@ function Salon() {
     (sum, l) => sum + l.precioUnitario * l.cantidad,
     0,
   );
+  const cambio = importeEntregado
+    ? Math.max(0, parseFloat(importeEntregado) - totalPedido)
+    : null;
 
   const productosFiltrados = filtroCategoria
     ? productos.filter((p) => p.categoria?.id === parseInt(filtroCategoria))
@@ -301,7 +313,6 @@ function Salon() {
     <div className="page">
       <h1>Salón</h1>
 
-      {/* Leyenda */}
       <div
         style={{
           display: "flex",
@@ -344,12 +355,10 @@ function Salon() {
         ))}
       </div>
 
-      {/* Mapa */}
       <div style={{ display: "flex", justifyContent: "center" }}>
         <div
           style={{ position: "relative", width: "700px", minHeight: "620px" }}
         >
-          {/* Terraza */}
           <div
             style={{
               position: "relative",
@@ -395,8 +404,6 @@ function Salon() {
             <Mesa numero="T1" top="24px" left="80px" />
             <Mesa numero="T2" top="24px" left="550px" />
           </div>
-
-          {/* Interior */}
           <div
             style={{
               position: "relative",
@@ -493,7 +500,7 @@ function Salon() {
         </div>
       </div>
 
-      {/* MODAL OPCIONES - Mesa libre */}
+      {/* MODAL OPCIONES */}
       {modal === "opciones" && (
         <div
           style={{
@@ -765,59 +772,41 @@ function Salon() {
                 marginBottom: "1.5rem",
               }}
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderBottom: "1px solid #f0e8dc",
-                  paddingBottom: "0.75rem",
-                }}
-              >
-                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
-                  Mesa
-                </span>
-                <span style={{ color: "#3a3028", fontWeight: "bold" }}>
-                  {mesaActiva?.numero}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderBottom: "1px solid #f0e8dc",
-                  paddingBottom: "0.75rem",
-                }}
-              >
-                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
-                  Nombre
-                </span>
-                <span style={{ color: "#3a3028" }}>
-                  {mesaActiva?.nombreReserva || "—"}
-                </span>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  borderBottom: "1px solid #f0e8dc",
-                  paddingBottom: "0.75rem",
-                }}
-              >
-                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
-                  Hora prevista
-                </span>
-                <span style={{ color: "#3a3028" }}>
-                  {mesaActiva?.horaReserva || "—"}
-                </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
-                  Personas
-                </span>
-                <span style={{ color: "#3a3028" }}>
-                  {mesaActiva?.personasReserva || "—"}
-                </span>
-              </div>
+              {[
+                { label: "Mesa", valor: mesaActiva?.numero },
+                { label: "Nombre", valor: mesaActiva?.nombreReserva || "—" },
+                {
+                  label: "Hora prevista",
+                  valor: mesaActiva?.horaReserva || "—",
+                },
+                {
+                  label: "Personas",
+                  valor: mesaActiva?.personasReserva || "—",
+                },
+              ].map((item, i, arr) => (
+                <div
+                  key={item.label}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    borderBottom:
+                      i < arr.length - 1 ? "1px solid #f0e8dc" : "none",
+                    paddingBottom: i < arr.length - 1 ? "0.75rem" : 0,
+                  }}
+                >
+                  <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                    {item.label}
+                  </span>
+                  <span
+                    style={{
+                      color: "#3a3028",
+                      fontWeight: i === 0 ? "bold" : "normal",
+                    }}
+                  >
+                    {item.valor}
+                  </span>
+                </div>
+              ))}
             </div>
             <button
               onClick={() => setModal("reservada")}
@@ -838,7 +827,7 @@ function Salon() {
         </div>
       )}
 
-      {/* MODAL PEDIDO - Mesa ocupada */}
+      {/* MODAL PEDIDO */}
       {modal === "pedido" && (
         <div
           style={{
@@ -865,6 +854,7 @@ function Salon() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Panel izquierdo - Productos */}
             <div
               style={{
                 flex: 1,
@@ -941,6 +931,8 @@ function Salon() {
                 ))}
               </div>
             </div>
+
+            {/* Panel derecho - Pedido */}
             <div
               style={{
                 width: "300px",
@@ -1066,6 +1058,7 @@ function Salon() {
                   ))
                 )}
               </div>
+
               <div
                 style={{
                   borderTop: "1px solid #e8ddd0",
@@ -1093,19 +1086,88 @@ function Salon() {
                     {totalPedido.toFixed(2)}€
                   </span>
                 </div>
-                <select
-                  value={metodoPago}
-                  onChange={(e) => setMetodoPago(e.target.value)}
+
+                {/* Selector método de pago */}
+                <div
                   style={{
-                    width: "100%",
+                    display: "flex",
+                    gap: "0.5rem",
                     marginBottom: "0.75rem",
-                    fontSize: "0.85rem",
                   }}
                 >
-                  <option value="EFECTIVO">Efectivo</option>
-                  <option value="TARJETA">Tarjeta</option>
-                  <option value="BIZUM">Bizum</option>
-                </select>
+                  {["EFECTIVO", "TARJETA"].map((mp) => (
+                    <button
+                      key={mp}
+                      onClick={() => {
+                        setMetodoPago(mp);
+                        setImporteEntregado("");
+                      }}
+                      style={{
+                        flex: 1,
+                        padding: "0.5rem",
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        fontFamily: "Georgia, serif",
+                        fontSize: "0.85rem",
+                        border:
+                          metodoPago === mp
+                            ? "2px solid #6b7c4a"
+                            : "1px solid #e8ddd0",
+                        background: metodoPago === mp ? "#e8f0e0" : "#f9f5f0",
+                        color: metodoPago === mp ? "#4a6030" : "#7a6a5a",
+                      }}
+                    >
+                      {mp === "EFECTIVO" ? "💵 Efectivo" : "💳 Tarjeta"}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Campo importe entregado solo para efectivo */}
+                {metodoPago === "EFECTIVO" && (
+                  <div style={{ marginBottom: "0.75rem" }}>
+                    <input
+                      type="number"
+                      placeholder="Importe entregado"
+                      min={totalPedido}
+                      step="0.01"
+                      value={importeEntregado}
+                      onChange={(e) => setImporteEntregado(e.target.value)}
+                      style={{
+                        width: "100%",
+                        fontSize: "0.95rem",
+                        marginBottom: "0.4rem",
+                      }}
+                    />
+                    {importeEntregado &&
+                      parseFloat(importeEntregado) >= totalPedido && (
+                        <div
+                          style={{
+                            background: "#e8f0e0",
+                            borderRadius: "6px",
+                            padding: "0.5rem 0.75rem",
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span
+                            style={{ color: "#4a6030", fontSize: "0.85rem" }}
+                          >
+                            Cambio
+                          </span>
+                          <span
+                            style={{
+                              color: "#4a6030",
+                              fontWeight: "bold",
+                              fontSize: "1rem",
+                            }}
+                          >
+                            {cambio?.toFixed(2)}€
+                          </span>
+                        </div>
+                      )}
+                  </div>
+                )}
+
                 <button
                   onClick={cobrar}
                   className="btn-primary"

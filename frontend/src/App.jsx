@@ -14,6 +14,7 @@ import Eventos from "./pages/Eventos";
 import Reservas from "./pages/Reservas";
 import Appcc from "./pages/Appcc";
 import Empleados from "./pages/Empleados";
+import CierreCaja from "./pages/CierreCaja";
 
 function App() {
   const [usuario, setUsuario] = useState(
@@ -60,6 +61,12 @@ function App() {
           <Route path="/eventos" element={<Eventos />} />
           <Route path="/reservas" element={<Reservas />} />
           <Route path="/appcc" element={<Appcc />} />
+          <Route
+            path="/cierre-caja"
+            element={
+              usuario.rol === "ADMIN" ? <CierreCaja /> : <Navigate to="/" />
+            }
+          />
           <Route
             path="/empleados"
             element={

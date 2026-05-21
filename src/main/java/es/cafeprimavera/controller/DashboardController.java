@@ -1,5 +1,6 @@
 package es.cafeprimavera.controller;
 
+import es.cafeprimavera.model.Pedido;
 import es.cafeprimavera.repository.*;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
@@ -32,9 +33,10 @@ public class DashboardController {
     public Map<String, Object> getDashboard() {
         Map<String, Object> data = new HashMap<>();
 
-        // Reservas de hoy
         LocalDateTime inicioDia = LocalDate.now().atStartOfDay();
         LocalDateTime finDia = LocalDate.now().atTime(23, 59, 59);
+
+        // Reservas de hoy
         List<?> reservasHoy = reservaRepository.findAll().stream()
             .filter(r -> {
                 LocalDateTime fecha = r.getFechaReserva();
@@ -50,17 +52,44 @@ public class DashboardController {
             }).toList();
         data.put("pedidosHoy", pedidosHoy.size());
 
-        // Ingresos de hoy
-        double ingresosHoy = pedidoRepository.findByEstado("PAGADO").stream()
+        // Pedidos pagados de hoy
+        List<Pedido> pedidosPagadosHoy = pedidoRepository.findByEstado("PAGADO").stream()
             .filter(p -> {
                 LocalDateTime fecha = p.getFecha();
                 return fecha != null && !fecha.isBefore(inicioDia) && !fecha.isAfter(finDia);
-            })
-            .mapToDouble(p -> p.getTotal())
+            }).toList();
+
+        // Ingresos totales de hoy
+        double ingresosHoy = pedidosPagadosHoy.stream()
+            .mapToDouble(Pedido::getTotal)
             .sum();
         data.put("ingresosHoy", ingresosHoy);
 
-        // Stock crítico (menos de 10 unidades)
+        // Ingresos por método de pago
+        double ingresosEfectivo = pedidosPagadosHoy.stream()
+            .filter(p -> "EFECTIVO".equals(p.getMetodoPago()))
+            .mapToDouble(Pedido::getTotal).sum();
+        double ingresosTarjeta = pedidosPagadosHoy.stream()
+            .filter(p -> "TARJETA".equals(p.getMetodoPago()))
+            .mapToDouble(Pedido::getTotal).sum();
+        double ingresosBizum = pedidosPagadosHoy.stream()
+            .filter(p -> "BIZUM".equals(p.getMetodoPago()))
+            .mapToDouble(Pedido::getTotal).sum();
+
+        data.put("ingresosEfectivo", ingresosEfectivo);
+        data.put("ingresosTarjeta", ingresosTarjeta);
+        data.put("ingresosBizum", ingresosBizum);
+        data.put("numPedidosPagados", pedidosPagadosHoy.size());
+
+        // Pedidos cancelados de hoy
+        long pedidosCancelados = pedidoRepository.findByEstado("CANCELADO").stream()
+            .filter(p -> {
+                LocalDateTime fecha = p.getFecha();
+                return fecha != null && !fecha.isBefore(inicioDia) && !fecha.isAfter(finDia);
+            }).count();
+        data.put("pedidosCancelados", pedidosCancelados);
+
+        // Stock crítico
         List<?> stockCritico = productoRepository.findAll().stream()
             .filter(p -> p.getActivo() && p.getStock() < 10)
             .toList();

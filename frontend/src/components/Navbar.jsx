@@ -64,6 +64,11 @@ function Navbar({ usuario, onLogout }) {
             APPCC
           </Link>
           {usuario?.rol === "ADMIN" && (
+            <Link to="/cierre-caja" style={linkStyle("/cierre-caja")}>
+              Caja
+            </Link>
+          )}
+          {usuario?.rol === "ADMIN" && (
             <Link to="/empleados" style={linkStyle("/empleados")}>
               Empleados
             </Link>

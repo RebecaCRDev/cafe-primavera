@@ -9,6 +9,7 @@ function Eventos() {
   const [modalReservas, setModalReservas] = useState(null);
   const [modalEditar, setModalEditar] = useState(null);
   const [nombreCliente, setNombreCliente] = useState("");
+  const [numPersonas, setNumPersonas] = useState("1");
   const [mensaje, setMensaje] = useState("");
   const [vistaActiva, setVistaActiva] = useState("talleres");
   const [nuevoNombre, setNuevoNombre] = useState("");
@@ -104,21 +105,32 @@ function Eventos() {
   const crearReserva = () => {
     if (!eventoSeleccionado || !nombreCliente)
       return setMensaje("Introduce el nombre del cliente");
+
+    const personas = parseInt(numPersonas) || 1;
+    if (personas > eventoSeleccionado.plazasDisponibles)
+      return setMensaje(
+        `Solo quedan ${eventoSeleccionado.plazasDisponibles} plazas disponibles`,
+      );
+
     const clienteExistente = clientes.find(
       (c) => c.nombre.toLowerCase() === nombreCliente.toLowerCase(),
     );
+
     const hacerReserva = (clienteId) => {
       api
         .post("/reservas", {
           cliente: { id: clienteId },
           evento: { id: eventoSeleccionado.id },
+          numPersonas: personas,
         })
         .then((res) => {
           setReservas([...reservas, res.data]);
           setNombreCliente("");
+          setNumPersonas("1");
           setEventoSeleccionado(null);
           setMensaje("Reserva creada correctamente");
           api.get("/eventos").then((r) => setEventos(r.data));
+          api.get("/reservas").then((r) => setReservas(r.data));
         })
         .catch(() =>
           setMensaje(
@@ -126,6 +138,7 @@ function Eventos() {
           ),
         );
     };
+
     if (clienteExistente) {
       hacerReserva(clienteExistente.id);
     } else {
@@ -142,6 +155,7 @@ function Eventos() {
       .then((res) => {
         setReservas(reservas.map((r) => (r.id === id ? res.data : r)));
         api.get("/eventos").then((r) => setEventos(r.data));
+        api.get("/reservas").then((r) => setReservas(r.data));
       })
       .catch(() => setMensaje("Error al cancelar"));
   };
@@ -279,7 +293,6 @@ function Eventos() {
     <div className="page">
       <h1>Talleres</h1>
 
-      {/* Selector de vista */}
       <div
         style={{
           display: "flex",
@@ -315,7 +328,6 @@ function Eventos() {
         ))}
       </div>
 
-      {/* Botón nuevo taller */}
       <div
         style={{
           display: "flex",
@@ -331,7 +343,6 @@ function Eventos() {
         </button>
       </div>
 
-      {/* Formulario nuevo taller */}
       {mostrarFormulario && (
         <div className="card" style={{ marginBottom: "2rem" }}>
           <h2 style={{ marginBottom: "1rem" }}>Nuevo taller</h2>
@@ -399,7 +410,6 @@ function Eventos() {
         </div>
       )}
 
-      {/* VISTA: Todos los talleres */}
       {vistaActiva === "talleres" && (
         <div
           style={{
@@ -414,7 +424,6 @@ function Eventos() {
         </div>
       )}
 
-      {/* VISTA: Esta semana */}
       {vistaActiva === "semana" && (
         <div>
           <p
@@ -462,13 +471,13 @@ function Eventos() {
         </div>
       )}
 
-      {/* VISTA: Todas las reservas */}
       {vistaActiva === "reservas" && (
         <table>
           <thead>
             <tr>
               <th>Cliente</th>
               <th>Taller</th>
+              <th>Personas</th>
               <th>Fecha reserva</th>
               <th>Estado</th>
               <th>Acción</th>
@@ -479,6 +488,7 @@ function Eventos() {
               <tr key={r.id}>
                 <td>{r.cliente?.nombre || "—"}</td>
                 <td style={{ color: "#7a6a5a" }}>{r.evento?.nombre}</td>
+                <td style={{ color: "#7a6a5a" }}>{r.numPersonas || 1}</td>
                 <td style={{ color: "#7a6a5a" }}>
                   {new Date(r.fechaReserva).toLocaleString("es-ES")}
                 </td>
@@ -505,7 +515,6 @@ function Eventos() {
         </table>
       )}
 
-      {/* MODAL nueva reserva */}
       {eventoSeleccionado && (
         <div
           style={{
@@ -524,7 +533,7 @@ function Eventos() {
               background: "#fff",
               borderRadius: "16px",
               padding: "2rem",
-              width: "380px",
+              width: "400px",
               boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
             }}
             onClick={(e) => e.stopPropagation()}
@@ -534,21 +543,42 @@ function Eventos() {
               style={{
                 color: "#7a6a5a",
                 fontSize: "0.9rem",
-                marginBottom: "1.5rem",
+                marginBottom: "0.5rem",
               }}
             >
               {eventoSeleccionado.nombre}
             </p>
-            <input
-              placeholder="Nombre del cliente *"
-              value={nombreCliente}
-              onChange={(e) => setNombreCliente(e.target.value)}
+            <p
               style={{
-                width: "100%",
-                fontSize: "0.95rem",
-                marginBottom: "1rem",
+                color: "#9e8e7e",
+                fontSize: "0.82rem",
+                marginBottom: "1.2rem",
               }}
-            />
+            >
+              Plazas disponibles:{" "}
+              <span style={{ color: "#6b7c4a", fontWeight: "bold" }}>
+                {eventoSeleccionado.plazasDisponibles}
+              </span>
+            </p>
+            <div
+              style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}
+            >
+              <input
+                placeholder="Nombre del cliente *"
+                value={nombreCliente}
+                onChange={(e) => setNombreCliente(e.target.value)}
+                style={{ flex: 2, fontSize: "0.95rem" }}
+              />
+              <input
+                type="number"
+                placeholder="Personas *"
+                min="1"
+                max={eventoSeleccionado?.plazasDisponibles}
+                value={numPersonas}
+                onChange={(e) => setNumPersonas(e.target.value)}
+                style={{ flex: 1, fontSize: "0.95rem" }}
+              />
+            </div>
             {mensaje && (
               <p
                 style={{
@@ -591,7 +621,6 @@ function Eventos() {
         </div>
       )}
 
-      {/* MODAL ver reservas de un evento */}
       {modalReservas && (
         <div
           style={{
@@ -610,7 +639,7 @@ function Eventos() {
               background: "#fff",
               borderRadius: "16px",
               padding: "2rem",
-              width: "460px",
+              width: "480px",
               maxHeight: "80vh",
               overflowY: "auto",
               boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
@@ -643,6 +672,7 @@ function Eventos() {
                 <thead>
                   <tr>
                     <th>Cliente</th>
+                    <th>Personas</th>
                     <th>Estado</th>
                     <th>Acción</th>
                   </tr>
@@ -651,6 +681,7 @@ function Eventos() {
                   {reservasDeEvento(modalReservas.id).map((r) => (
                     <tr key={r.id}>
                       <td>{r.cliente?.nombre || "—"}</td>
+                      <td>{r.numPersonas || 1}</td>
                       <td>
                         <span
                           className={`badge ${r.estado === "CONFIRMADA" ? "badge-green" : "badge-gray"}`}
@@ -695,7 +726,6 @@ function Eventos() {
         </div>
       )}
 
-      {/* MODAL editar taller */}
       {modalEditar && (
         <div
           style={{

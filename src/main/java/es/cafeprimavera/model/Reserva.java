@@ -15,7 +15,10 @@ public class Reserva {
     private LocalDateTime fechaReserva = LocalDateTime.now();
 
     @Column(nullable = false, name = "estado")
-    private String estado = "PENDIENTE";    
+    private String estado = "PENDIENTE";
+
+    @Column(nullable = false, name = "num_personas")
+    private Integer numPersonas = 1;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id", nullable = false)
@@ -31,6 +34,8 @@ public class Reserva {
     public void setFechaReserva(LocalDateTime fechaReserva) { this.fechaReserva = fechaReserva; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+    public Integer getNumPersonas() { return numPersonas; }
+    public void setNumPersonas(Integer numPersonas) { this.numPersonas = numPersonas; }
     public Cliente getCliente() { return cliente; }
     public void setCliente(Cliente cliente) { this.cliente = cliente; }
     public Evento getEvento() { return evento; }
