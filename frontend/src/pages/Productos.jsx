@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 
+const PRODUCTOS_POR_PAGINA = 10;
+
 function Productos() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -14,6 +16,7 @@ function Productos() {
   const [tipoMovimiento, setTipoMovimiento] = useState("COMPRA");
   const [cantidad, setCantidad] = useState("");
   const [motivo, setMotivo] = useState("");
+  const [pagina, setPagina] = useState(1);
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -22,11 +25,41 @@ function Productos() {
     api.get("/categorias").then((res) => setCategorias(res.data));
   }, []);
 
-  const productosFiltrados = filtro
-    ? productos.filter((p) => p.categoria?.id === parseInt(filtro))
-    : productos;
+  const handleFiltro = (valor) => {
+    setFiltro(valor);
+    setPagina(1);
+  };
 
-  const stockCritico = productos.filter((p) => p.activo && p.stock < 10);
+  const categoriasPorRol = categorias.filter((c) => {
+    if (usuario?.rol === "CAJERO")
+      return c.tipo === "CAFETERIA" || c.tipo === "PACK";
+    if (usuario?.rol === "FLORISTA")
+      return c.tipo === "FLORISTERIA" || c.tipo === "PACK";
+    return true;
+  });
+
+  const productosPorRol = productos.filter((p) => {
+    const tipo = p.categoria?.tipo;
+    if (usuario?.rol === "CAJERO")
+      return tipo === "CAFETERIA" || tipo === "PACK";
+    if (usuario?.rol === "FLORISTA")
+      return tipo === "FLORISTERIA" || tipo === "PACK";
+    return true;
+  });
+
+  const productosFiltrados = filtro
+    ? productosPorRol.filter((p) => p.categoria?.id === parseInt(filtro))
+    : productosPorRol;
+
+  const totalPaginas = Math.ceil(
+    productosFiltrados.length / PRODUCTOS_POR_PAGINA,
+  );
+  const productosPagina = productosFiltrados.slice(
+    (pagina - 1) * PRODUCTOS_POR_PAGINA,
+    pagina * PRODUCTOS_POR_PAGINA,
+  );
+
+  const stockCritico = productosPorRol.filter((p) => p.activo && p.stock < 10);
 
   const crearProducto = () => {
     if (!nombre || !precio || !categoriaId)
@@ -160,7 +193,7 @@ function Productos() {
             style={{ flex: 2 }}
           >
             <option value="">Categoría *</option>
-            {categorias.map((c) => (
+            {categoriasPorRol.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.nombre}
               </option>
@@ -184,15 +217,26 @@ function Productos() {
       </div>
 
       {/* Filtro */}
-      <div style={{ marginBottom: "1.5rem" }}>
-        <select onChange={(e) => setFiltro(e.target.value)}>
+      <div
+        style={{
+          marginBottom: "1.5rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <select onChange={(e) => handleFiltro(e.target.value)}>
           <option value="">Todas las categorías</option>
-          {categorias.map((c) => (
+          {categoriasPorRol.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nombre}
             </option>
           ))}
         </select>
+        <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+          {productosFiltrados.length} productos · página {pagina} de{" "}
+          {totalPaginas || 1}
+        </span>
       </div>
 
       {/* Tabla */}
@@ -208,7 +252,7 @@ function Productos() {
           </tr>
         </thead>
         <tbody>
-          {productosFiltrados.map((p) => (
+          {productosPagina.map((p) => (
             <tr key={p.id}>
               <td>{p.nombre}</td>
               <td style={{ color: "#7a6a5a" }}>{p.categoria?.nombre}</td>
@@ -256,6 +300,123 @@ function Productos() {
           ))}
         </tbody>
       </table>
+
+      {/* Paginación */}
+      {totalPaginas > 1 && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "0.5rem",
+            marginTop: "1.5rem",
+          }}
+        >
+          <button
+            onClick={() => setPagina(1)}
+            disabled={pagina === 1}
+            style={{
+              background: pagina === 1 ? "#f0ece8" : "#e8f0e0",
+              border: "none",
+              borderRadius: "6px",
+              padding: "0.4rem 0.7rem",
+              cursor: pagina === 1 ? "default" : "pointer",
+              color: pagina === 1 ? "#b0a090" : "#4a6030",
+              fontFamily: "Georgia, serif",
+              fontSize: "0.85rem",
+            }}
+          >
+            «
+          </button>
+          <button
+            onClick={() => setPagina((p) => Math.max(1, p - 1))}
+            disabled={pagina === 1}
+            style={{
+              background: pagina === 1 ? "#f0ece8" : "#e8f0e0",
+              border: "none",
+              borderRadius: "6px",
+              padding: "0.4rem 0.7rem",
+              cursor: pagina === 1 ? "default" : "pointer",
+              color: pagina === 1 ? "#b0a090" : "#4a6030",
+              fontFamily: "Georgia, serif",
+              fontSize: "0.85rem",
+            }}
+          >
+            ‹
+          </button>
+
+          {Array.from({ length: totalPaginas }, (_, i) => i + 1)
+            .filter(
+              (n) => n === 1 || n === totalPaginas || Math.abs(n - pagina) <= 1,
+            )
+            .reduce((acc, n, i, arr) => {
+              if (i > 0 && n - arr[i - 1] > 1) acc.push("...");
+              acc.push(n);
+              return acc;
+            }, [])
+            .map((item, i) =>
+              item === "..." ? (
+                <span
+                  key={`dots-${i}`}
+                  style={{ color: "#9e8e7e", fontSize: "0.85rem" }}
+                >
+                  …
+                </span>
+              ) : (
+                <button
+                  key={item}
+                  onClick={() => setPagina(item)}
+                  style={{
+                    background: pagina === item ? "#6b7c4a" : "#f9f5f0",
+                    border: pagina === item ? "none" : "1px solid #e8ddd0",
+                    borderRadius: "6px",
+                    padding: "0.4rem 0.75rem",
+                    cursor: "pointer",
+                    color: pagina === item ? "#fff" : "#7a6a5a",
+                    fontFamily: "Georgia, serif",
+                    fontSize: "0.85rem",
+                    fontWeight: pagina === item ? "bold" : "normal",
+                  }}
+                >
+                  {item}
+                </button>
+              ),
+            )}
+
+          <button
+            onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
+            disabled={pagina === totalPaginas}
+            style={{
+              background: pagina === totalPaginas ? "#f0ece8" : "#e8f0e0",
+              border: "none",
+              borderRadius: "6px",
+              padding: "0.4rem 0.7rem",
+              cursor: pagina === totalPaginas ? "default" : "pointer",
+              color: pagina === totalPaginas ? "#b0a090" : "#4a6030",
+              fontFamily: "Georgia, serif",
+              fontSize: "0.85rem",
+            }}
+          >
+            ›
+          </button>
+          <button
+            onClick={() => setPagina(totalPaginas)}
+            disabled={pagina === totalPaginas}
+            style={{
+              background: pagina === totalPaginas ? "#f0ece8" : "#e8f0e0",
+              border: "none",
+              borderRadius: "6px",
+              padding: "0.4rem 0.7rem",
+              cursor: pagina === totalPaginas ? "default" : "pointer",
+              color: pagina === totalPaginas ? "#b0a090" : "#4a6030",
+              fontFamily: "Georgia, serif",
+              fontSize: "0.85rem",
+            }}
+          >
+            »
+          </button>
+        </div>
+      )}
 
       {/* Modal gestión de stock */}
       {modalGestion && (
@@ -308,8 +469,6 @@ function Productos() {
                 {modalGestion.stock} unidades
               </span>
             </p>
-
-            {/* Selector tipo */}
             <div
               style={{ display: "flex", gap: "0.5rem", marginBottom: "1.2rem" }}
             >
@@ -366,8 +525,6 @@ function Productos() {
                 </button>
               ))}
             </div>
-
-            {/* Descripción del tipo seleccionado */}
             <p
               style={{
                 color: "#9e8e7e",
@@ -383,7 +540,6 @@ function Productos() {
               {tipoMovimiento === "BAJA" &&
                 "Introduce las unidades a retirar por caducidad, rotura u otro motivo."}
             </p>
-
             <input
               type="number"
               min="0"
@@ -400,7 +556,6 @@ function Productos() {
                 marginBottom: "0.75rem",
               }}
             />
-
             <input
               placeholder="Motivo (opcional)"
               value={motivo}
@@ -411,7 +566,6 @@ function Productos() {
                 marginBottom: "1rem",
               }}
             />
-
             {nuevoStock !== null && (
               <div
                 style={{
@@ -438,7 +592,6 @@ function Productos() {
                 </span>
               </div>
             )}
-
             <div style={{ display: "flex", gap: "0.75rem" }}>
               <button
                 className="btn-primary"

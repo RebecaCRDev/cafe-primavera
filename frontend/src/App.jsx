@@ -34,9 +34,7 @@ function App() {
     setMostrarDashboard(false);
   };
 
-  if (!usuario) {
-    return <Login onLogin={handleLogin} />;
-  }
+  if (!usuario) return <Login onLogin={handleLogin} />;
 
   if (mostrarDashboard) {
     return (
@@ -47,32 +45,40 @@ function App() {
     );
   }
 
+  const rol = usuario.rol;
+  const rutaInicio = rol === "FLORISTA" ? "/eventos" : "/salon";
+
+  const soloAdmin = (elemento) =>
+    rol === "ADMIN" ? elemento : <Navigate to={rutaInicio} />;
+  const cajeroOAdmin = (elemento) =>
+    rol === "CAJERO" || rol === "ADMIN" ? (
+      elemento
+    ) : (
+      <Navigate to={rutaInicio} />
+    );
+  const floristaOAdmin = (elemento) =>
+    rol === "FLORISTA" || rol === "ADMIN" ? (
+      elemento
+    ) : (
+      <Navigate to={rutaInicio} />
+    );
+
   return (
     <BrowserRouter>
       <CarritoProvider>
         <Navbar usuario={usuario} onLogout={handleLogout} />
         <Routes>
-          <Route path="/" element={<Navigate to="/salon" />} />
-          <Route path="/salon" element={<Salon />} />
-          <Route path="/carta" element={<Carta />} />
-          <Route path="/tpv" element={<TPV />} />
+          <Route path="/" element={<Navigate to={rutaInicio} />} />
+          <Route path="/salon" element={cajeroOAdmin(<Salon />)} />
           <Route path="/productos" element={<Productos />} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/eventos" element={<Eventos />} />
-          <Route path="/reservas" element={<Reservas />} />
+          <Route path="/eventos" element={floristaOAdmin(<Eventos />)} />
           <Route path="/appcc" element={<Appcc />} />
-          <Route
-            path="/cierre-caja"
-            element={
-              usuario.rol === "ADMIN" ? <CierreCaja /> : <Navigate to="/" />
-            }
-          />
-          <Route
-            path="/empleados"
-            element={
-              usuario.rol === "ADMIN" ? <Empleados /> : <Navigate to="/" />
-            }
-          />
+          <Route path="/cierre-caja" element={<CierreCaja />} />
+          <Route path="/empleados" element={soloAdmin(<Empleados />)} />
+          <Route path="/carta" element={<Carta />} />
+          <Route path="/tpv" element={cajeroOAdmin(<TPV />)} />
+          <Route path="/clientes" element={<Clientes />} />
+          <Route path="/reservas" element={<Reservas />} />
         </Routes>
       </CarritoProvider>
     </BrowserRouter>

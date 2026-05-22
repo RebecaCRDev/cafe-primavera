@@ -19,6 +19,12 @@ function Appcc() {
   const [observaciones, setObservaciones] = useState("");
   const [filtro, setFiltro] = useState("");
   const [mensaje, setMensaje] = useState("");
+  const [modalEditar, setModalEditar] = useState(null);
+  const [editTipo, setEditTipo] = useState("");
+  const [editDescripcion, setEditDescripcion] = useState("");
+  const [editValor, setEditValor] = useState("");
+  const [editResultado, setEditResultado] = useState("");
+  const [editObservaciones, setEditObservaciones] = useState("");
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -37,8 +43,8 @@ function Appcc() {
         observaciones,
         empleado: { id: usuario.id },
       })
-      .then((res) => {
-        setRegistros([res.data, ...registros]);
+      .then(() => {
+        api.get("/appcc").then((res) => setRegistros(res.data));
         setDescripcion("");
         setValor("");
         setObservaciones("");
@@ -46,6 +52,38 @@ function Appcc() {
         setMensaje("Registro creado correctamente");
       })
       .catch(() => setMensaje("Error al crear el registro"));
+  };
+
+  const abrirEditar = (registro) => {
+    setModalEditar(registro);
+    setEditTipo(registro.tipo);
+    setEditDescripcion(registro.descripcion);
+    setEditValor(registro.valor || "");
+    setEditResultado(registro.resultado);
+    setEditObservaciones(registro.observaciones || "");
+    setMensaje("");
+  };
+
+  const guardarEdicion = () => {
+    if (!editDescripcion) return setMensaje("La descripción es obligatoria");
+    api
+      .put(`/appcc/${modalEditar.id}`, {
+        ...modalEditar,
+        tipo: editTipo,
+        descripcion: editDescripcion,
+        valor: editValor,
+        resultado: editResultado,
+        observaciones: editObservaciones,
+        empleado: { id: modalEditar.empleado?.id || usuario.id },
+      })
+      .then((res) => {
+        setRegistros(
+          registros.map((r) => (r.id === modalEditar.id ? res.data : r)),
+        );
+        setModalEditar(null);
+        setMensaje("Registro actualizado correctamente");
+      })
+      .catch(() => setMensaje("Error al actualizar el registro"));
   };
 
   const registrosFiltrados = filtro
@@ -154,6 +192,7 @@ function Appcc() {
             <th>Resultado</th>
             <th>Fecha</th>
             <th>Empleado</th>
+            <th>Acción</th>
           </tr>
         </thead>
         <tbody>
@@ -181,10 +220,141 @@ function Appcc() {
               <td style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
                 {r.empleado?.nombre || "—"}
               </td>
+              <td>
+                <button
+                  onClick={() => abrirEditar(r)}
+                  style={{
+                    background: "#e8f0e0",
+                    color: "#4a6030",
+                    border: "1px solid #6b7c4a",
+                    borderRadius: "6px",
+                    padding: "0.3rem 0.8rem",
+                    cursor: "pointer",
+                    fontSize: "0.8rem",
+                    fontFamily: "Georgia, serif",
+                  }}
+                >
+                  ✏️ Editar
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* Modal editar */}
+      {modalEditar && (
+        <div
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+          }}
+          onClick={() => setModalEditar(null)}
+        >
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: "16px",
+              padding: "2rem",
+              width: "480px",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 style={{ marginBottom: "1.5rem" }}>Editar registro APPCC</h2>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.75rem",
+              }}
+            >
+              <div className="form-row">
+                <select
+                  value={editTipo}
+                  onChange={(e) => setEditTipo(e.target.value)}
+                  style={{ flex: 2 }}
+                >
+                  {TIPOS.map((t) => (
+                    <option key={t.valor} value={t.valor}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+                <select
+                  value={editResultado}
+                  onChange={(e) => setEditResultado(e.target.value)}
+                  style={{ flex: 1 }}
+                >
+                  <option value="CORRECTO">Correcto</option>
+                  <option value="INCIDENCIA">Incidencia</option>
+                </select>
+              </div>
+              <div className="form-row">
+                <input
+                  placeholder="Descripción *"
+                  value={editDescripcion}
+                  onChange={(e) => setEditDescripcion(e.target.value)}
+                  style={{ flex: 3 }}
+                />
+                <input
+                  placeholder="Valor medido"
+                  value={editValor}
+                  onChange={(e) => setEditValor(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+              </div>
+              <input
+                placeholder="Observaciones"
+                value={editObservaciones}
+                onChange={(e) => setEditObservaciones(e.target.value)}
+              />
+            </div>
+            {mensaje && (
+              <p
+                style={{
+                  color: "#c0392b",
+                  fontSize: "0.85rem",
+                  marginTop: "0.75rem",
+                }}
+              >
+                {mensaje}
+              </p>
+            )}
+            <div
+              style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}
+            >
+              <button
+                className="btn-primary"
+                onClick={guardarEdicion}
+                style={{ flex: 1, padding: "0.75rem" }}
+              >
+                Guardar cambios
+              </button>
+              <button
+                onClick={() => setModalEditar(null)}
+                style={{
+                  flex: 1,
+                  background: "#f0ece8",
+                  border: "none",
+                  borderRadius: "6px",
+                  padding: "0.75rem",
+                  cursor: "pointer",
+                  color: "#7a6a5a",
+                  fontFamily: "Georgia, serif",
+                }}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

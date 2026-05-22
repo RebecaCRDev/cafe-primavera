@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 
 function Navbar({ usuario, onLogout }) {
   const location = useLocation();
+  const rol = usuario?.rol;
 
   const linkStyle = (path) => ({
     color: location.pathname === path ? "#6b7c4a" : "#7a6a5a",
@@ -37,7 +38,10 @@ function Navbar({ usuario, onLogout }) {
           height: "64px",
         }}
       >
-        <Link to="/salon" style={{ textDecoration: "none" }}>
+        <Link
+          to={rol === "FLORISTA" ? "/eventos" : "/salon"}
+          style={{ textDecoration: "none" }}
+        >
           <span
             style={{
               color: "#6b7c4a",
@@ -51,24 +55,37 @@ function Navbar({ usuario, onLogout }) {
         </Link>
 
         <div style={{ display: "flex", gap: "2.5rem", alignItems: "center" }}>
-          <Link to="/salon" style={linkStyle("/salon")}>
-            Salón
-          </Link>
+          {/* CAJERO y ADMIN */}
+          {(rol === "CAJERO" || rol === "ADMIN") && (
+            <Link to="/salon" style={linkStyle("/salon")}>
+              Salón
+            </Link>
+          )}
+
+          {/* Inventario: todos pero con filtro por rol */}
           <Link to="/productos" style={linkStyle("/productos")}>
             Inventario
           </Link>
-          <Link to="/eventos" style={linkStyle("/eventos")}>
-            Talleres
-          </Link>
+
+          {/* Talleres: FLORISTA y ADMIN */}
+          {(rol === "FLORISTA" || rol === "ADMIN") && (
+            <Link to="/eventos" style={linkStyle("/eventos")}>
+              Talleres
+            </Link>
+          )}
+
+          {/* APPCC: todos */}
           <Link to="/appcc" style={linkStyle("/appcc")}>
             APPCC
           </Link>
-          {usuario?.rol === "ADMIN" && (
-            <Link to="/cierre-caja" style={linkStyle("/cierre-caja")}>
-              Caja
-            </Link>
-          )}
-          {usuario?.rol === "ADMIN" && (
+
+          {/* Caja: todos pero con vista diferente */}
+          <Link to="/cierre-caja" style={linkStyle("/cierre-caja")}>
+            Caja
+          </Link>
+
+          {/* Solo ADMIN */}
+          {rol === "ADMIN" && (
             <Link to="/empleados" style={linkStyle("/empleados")}>
               Empleados
             </Link>
@@ -81,14 +98,24 @@ function Navbar({ usuario, onLogout }) {
             <span
               style={{
                 marginLeft: "0.5rem",
-                background: "#e8f0e0",
-                color: "#4a6030",
+                background:
+                  rol === "ADMIN"
+                    ? "#f5e8e8"
+                    : rol === "FLORISTA"
+                      ? "#e8f0e0"
+                      : "#e8eef5",
+                color:
+                  rol === "ADMIN"
+                    ? "#c0392b"
+                    : rol === "FLORISTA"
+                      ? "#4a6030"
+                      : "#2c5f8a",
                 padding: "0.1rem 0.5rem",
                 borderRadius: "10px",
                 fontSize: "0.75rem",
               }}
             >
-              {usuario?.rol}
+              {rol}
             </span>
           </span>
           <button
