@@ -21,11 +21,14 @@ public class CierreCaja {
     @Column(nullable = false, name = "total_tarjeta")
     private Double totalTarjeta = 0.0;
 
-    @Column(nullable = false, name = "total_bizum")
-    private Double totalBizum = 0.0;
-
     @Column(nullable = false, name = "total_general")
     private Double totalGeneral = 0.0;
+
+    @Column(nullable = false, name = "total_cafeteria")
+    private Double totalCafeteria = 0.0;
+
+    @Column(nullable = false, name = "total_floristeria")
+    private Double totalFloristeria = 0.0;
 
     @Column(nullable = false, name = "num_pedidos")
     private Integer numPedidos = 0;
@@ -50,10 +53,12 @@ public class CierreCaja {
     public void setTotalEfectivo(Double totalEfectivo) { this.totalEfectivo = totalEfectivo; }
     public Double getTotalTarjeta() { return totalTarjeta; }
     public void setTotalTarjeta(Double totalTarjeta) { this.totalTarjeta = totalTarjeta; }
-    public Double getTotalBizum() { return totalBizum; }
-    public void setTotalBizum(Double totalBizum) { this.totalBizum = totalBizum; }
     public Double getTotalGeneral() { return totalGeneral; }
     public void setTotalGeneral(Double totalGeneral) { this.totalGeneral = totalGeneral; }
+    public Double getTotalCafeteria() { return totalCafeteria; }
+    public void setTotalCafeteria(Double totalCafeteria) { this.totalCafeteria = totalCafeteria; }
+    public Double getTotalFloristeria() { return totalFloristeria; }
+    public void setTotalFloristeria(Double totalFloristeria) { this.totalFloristeria = totalFloristeria; }
     public Integer getNumPedidos() { return numPedidos; }
     public void setNumPedidos(Integer numPedidos) { this.numPedidos = numPedidos; }
     public Integer getNumCancelados() { return numCancelados; }

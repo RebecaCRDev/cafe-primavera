@@ -2,8 +2,10 @@ package es.cafeprimavera.service;
 
 import es.cafeprimavera.model.CierreCaja;
 import es.cafeprimavera.model.Empleado;
+import es.cafeprimavera.model.LineaPedido;
 import es.cafeprimavera.model.Pedido;
 import es.cafeprimavera.repository.CierreCajaRepository;
+import es.cafeprimavera.repository.LineaPedidoRepository;
 import es.cafeprimavera.repository.PedidoRepository;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
@@ -16,11 +18,14 @@ public class CierreCajaService {
 
     private final CierreCajaRepository cierreCajaRepository;
     private final PedidoRepository pedidoRepository;
+    private final LineaPedidoRepository lineaPedidoRepository;
 
     public CierreCajaService(CierreCajaRepository cierreCajaRepository,
-                              PedidoRepository pedidoRepository) {
+                              PedidoRepository pedidoRepository,
+                              LineaPedidoRepository lineaPedidoRepository) {
         this.cierreCajaRepository = cierreCajaRepository;
         this.pedidoRepository = pedidoRepository;
+        this.lineaPedidoRepository = lineaPedidoRepository;
     }
 
     public List<CierreCaja> findAll() {
@@ -29,6 +34,14 @@ public class CierreCajaService {
 
     public Optional<CierreCaja> findByFecha(LocalDate fecha) {
         return cierreCajaRepository.findByFecha(fecha);
+    }
+
+    private boolean esCafeteria(String tipo) {
+        return "CAFETERIA".equals(tipo) || "PACK".equals(tipo);
+    }
+
+    private boolean esFloristeria(String tipo) {
+        return "FLORISTERIA".equals(tipo) || "PACK".equals(tipo);
     }
 
     public CierreCaja cerrarCaja(String observaciones, Integer empleadoId) {
@@ -53,16 +66,46 @@ public class CierreCajaService {
                 return fecha != null && !fecha.isBefore(inicioDia) && !fecha.isAfter(finDia);
             }).count();
 
-        double efectivo = pedidosPagados.stream().filter(p -> "EFECTIVO".equals(p.getMetodoPago())).mapToDouble(Pedido::getTotal).sum();
-        double tarjeta = pedidosPagados.stream().filter(p -> "TARJETA".equals(p.getMetodoPago())).mapToDouble(Pedido::getTotal).sum();
-        double bizum = pedidosPagados.stream().filter(p -> "BIZUM".equals(p.getMetodoPago())).mapToDouble(Pedido::getTotal).sum();
+        double efectivo = pedidosPagados.stream()
+            .filter(p -> "EFECTIVO".equals(p.getMetodoPago()))
+            .mapToDouble(Pedido::getTotal).sum();
+
+        double tarjeta = pedidosPagados.stream()
+            .filter(p -> "TARJETA".equals(p.getMetodoPago()))
+            .mapToDouble(Pedido::getTotal).sum();
+
+        // Calcular desglose por área línea a línea
+        double totalCafeteria = 0.0;
+        double totalFloristeria = 0.0;
+
+        for (Pedido pedido : pedidosPagados) {
+            List<LineaPedido> lineas = lineaPedidoRepository.findByPedido_Id(pedido.getId());
+            for (LineaPedido linea : lineas) {
+                String tipo = linea.getProducto() != null && linea.getProducto().getCategoria() != null
+                    ? linea.getProducto().getCategoria().getTipo()
+                    : null;
+                double importe = linea.getPrecioUnitario() * linea.getCantidad();
+                if (tipo != null) {
+                    if ("PACK".equals(tipo)) {
+                        // Los PACK se reparten al 50% entre cafetería y floristería
+                        totalCafeteria += importe / 2;
+                        totalFloristeria += importe / 2;
+                    } else if ("CAFETERIA".equals(tipo)) {
+                        totalCafeteria += importe;
+                    } else if ("FLORISTERIA".equals(tipo)) {
+                        totalFloristeria += importe;
+                    }
+                }
+            }
+        }
 
         CierreCaja cierre = new CierreCaja();
         cierre.setFecha(hoy);
         cierre.setTotalEfectivo(efectivo);
         cierre.setTotalTarjeta(tarjeta);
-        cierre.setTotalBizum(bizum);
-        cierre.setTotalGeneral(efectivo + tarjeta + bizum);
+        cierre.setTotalGeneral(efectivo + tarjeta);
+        cierre.setTotalCafeteria(totalCafeteria);
+        cierre.setTotalFloristeria(totalFloristeria);
         cierre.setNumPedidos(pedidosPagados.size());
         cierre.setNumCancelados((int) cancelados);
         cierre.setObservaciones(observaciones);

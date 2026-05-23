@@ -78,4 +78,9 @@ public class PedidoController {
             .map(ResponseEntity::ok)
             .orElse(ResponseEntity.ok(null));
     }
+    
+    @GetMapping("/fecha/{fecha}")
+    public List<Pedido> getByFecha(@PathVariable String fecha) {
+        return pedidoService.findByFecha(java.time.LocalDate.parse(fecha));
+    }
 }

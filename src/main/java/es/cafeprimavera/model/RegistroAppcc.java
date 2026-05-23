@@ -25,7 +25,7 @@ public class RegistroAppcc {
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "empleado_id", nullable = false)
     private Empleado empleado;
 

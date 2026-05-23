@@ -1,6 +1,7 @@
 package es.cafeprimavera.model;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "empleado")
@@ -16,6 +17,7 @@ public class Empleado {
     @Column(nullable = false, unique = true, length = 200)
     private String email;
 
+    @JsonIgnore
     @Column(nullable = false)
     private String passwordHash;
 

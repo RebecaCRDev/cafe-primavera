@@ -106,6 +106,16 @@ public class PedidoService {
 
         return pedidoRepository.save(pedido);
     }
+    
+    public List<Pedido> findByFecha(java.time.LocalDate fecha) {
+        java.time.LocalDateTime inicio = fecha.atStartOfDay();
+        java.time.LocalDateTime fin = fecha.atTime(23, 59, 59);
+        return pedidoRepository.findAll().stream()
+            .filter(p -> {
+                java.time.LocalDateTime f = p.getFecha();
+                return f != null && !f.isBefore(inicio) && !f.isAfter(fin);
+            }).toList();
+    }
 
     public void deleteLinea(Integer id) {
     lineaPedidoRepository.deleteById(id);

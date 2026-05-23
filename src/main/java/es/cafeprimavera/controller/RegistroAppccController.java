@@ -42,4 +42,17 @@ public class RegistroAppccController {
         registroAppccService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RegistroAppcc> update(@PathVariable Integer id,
+                                                @RequestBody RegistroAppcc registro) {
+        return registroAppccService.findById(id).map(r -> {
+            registro.setId(id);
+            registro.setFecha(r.getFecha());
+            if (registro.getEmpleado() == null || registro.getEmpleado().getId() == null) {
+                registro.setEmpleado(r.getEmpleado());
+            }
+            return ResponseEntity.ok(registroAppccService.save(registro));
+        }).orElse(ResponseEntity.notFound().build());
+    }
 }
