@@ -73,7 +73,7 @@ function App() {
           <Route path="/productos" element={<Productos />} />
           <Route path="/eventos" element={floristaOAdmin(<Eventos />)} />
           <Route path="/appcc" element={<Appcc />} />
-          <Route path="/cierre-caja" element={cajeroOAdmin(<CierreCaja />)} />
+          <Route path="/cierre-caja" element={<CierreCaja />} />
           <Route path="/empleados" element={soloAdmin(<Empleados />)} />
           <Route path="/carta" element={cajeroOAdmin(<Carta />)} />
           <Route path="/tpv" element={cajeroOAdmin(<TPV />)} />

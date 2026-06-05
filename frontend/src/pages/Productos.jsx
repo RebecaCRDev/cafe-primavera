@@ -25,6 +25,7 @@ function Productos() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
   const [filtro, setFiltro] = useState("");
+  const [busqueda, setBusqueda] = useState("");
   const [nombre, setNombre] = useState("");
   const [precio, setPrecio] = useState("");
   const [stock, setStock] = useState("");
@@ -69,9 +70,15 @@ function Productos() {
     return true;
   });
 
-  const productosFiltrados = filtro
-    ? productosPorRol.filter((p) => p.categoria?.id === parseInt(filtro))
-    : productosPorRol;
+  const productosFiltrados = productosPorRol.filter((p) => {
+    const coincideCategoria = filtro
+      ? p.categoria?.id === parseInt(filtro)
+      : true;
+    const coincideBusqueda = p.nombre
+      .toLowerCase()
+      .includes(busqueda.toLowerCase());
+    return coincideCategoria && coincideBusqueda;
+  });
 
   const totalPaginas = Math.ceil(
     productosFiltrados.length / PRODUCTOS_POR_PAGINA,
@@ -349,24 +356,45 @@ function Productos() {
         )}
       </div>
 
-      {/* Filtro */}
+      {/* Filtro y buscador */}
       <div
         style={{
           marginBottom: "1.5rem",
           display: "flex",
           alignItems: "center",
+          gap: "1rem",
           justifyContent: "space-between",
         }}
       >
-        <select onChange={(e) => handleFiltro(e.target.value)}>
-          <option value="">Todas las categorías</option>
-          {categoriasPorRol.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.nombre}
-            </option>
-          ))}
-        </select>
-        <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+        <div style={{ display: "flex", gap: "1rem", flex: 1 }}>
+          <input
+            placeholder="🔍 Buscar producto..."
+            value={busqueda}
+            onChange={(e) => {
+              setBusqueda(e.target.value);
+              setPagina(1);
+            }}
+            style={{ flex: 2 }}
+          />
+          <select
+            onChange={(e) => handleFiltro(e.target.value)}
+            style={{ flex: 1 }}
+          >
+            <option value="">Todas las categorías</option>
+            {categoriasPorRol.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+        <span
+          style={{
+            color: "#9e8e7e",
+            fontSize: "0.85rem",
+            whiteSpace: "nowrap",
+          }}
+        >
           {productosFiltrados.length} productos · página {pagina} de{" "}
           {totalPaginas || 1}
         </span>
