@@ -29,7 +29,7 @@ function Reservas() {
         setEventoId("");
         setMensaje("Reserva creada correctamente");
       })
-      .catch((err) =>
+      .catch(() =>
         setMensaje("Este cliente ya tiene una reserva activa para este taller"),
       );
   };
@@ -48,8 +48,8 @@ function Reservas() {
     <div className="page">
       <h1>Reservas</h1>
 
-      <div className="card" style={{ marginBottom: "2rem" }}>
-        <h2 style={{ marginBottom: "1rem" }}>Nueva reserva</h2>
+      <div className="card card-formulario">
+        <h2>Nueva reserva</h2>
         <div className="form-row">
           <select
             value={clienteId}
@@ -79,17 +79,7 @@ function Reservas() {
             Reservar
           </button>
         </div>
-        {mensaje && (
-          <p
-            style={{
-              color: "#6b7c4a",
-              marginTop: "0.75rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            {mensaje}
-          </p>
-        )}
+        {mensaje && <p className="mensaje-exito">{mensaje}</p>}
       </div>
 
       <table>
@@ -106,8 +96,8 @@ function Reservas() {
           {reservas.map((r) => (
             <tr key={r.id}>
               <td>{r.cliente?.nombre || "—"}</td>
-              <td style={{ color: "#7a6a5a" }}>{r.evento?.nombre}</td>
-              <td style={{ color: "#7a6a5a" }}>
+              <td className="td-secundario">{r.evento?.nombre}</td>
+              <td className="td-secundario">
                 {new Date(r.fechaReserva).toLocaleString("es-ES")}
               </td>
               <td>

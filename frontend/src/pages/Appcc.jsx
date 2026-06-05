@@ -97,8 +97,8 @@ function Appcc() {
     <div className="page">
       <h1>Control APPCC</h1>
 
-      <div className="card" style={{ marginBottom: "2rem" }}>
-        <h2 style={{ marginBottom: "1rem" }}>Nuevo registro</h2>
+      <div className="card card-formulario">
+        <h2>Nuevo registro</h2>
         <div className="form-row" style={{ marginBottom: "1rem" }}>
           <select
             value={tipo}
@@ -145,27 +145,10 @@ function Appcc() {
             Registrar
           </button>
         </div>
-        {mensaje && (
-          <p
-            style={{
-              color: "#6b7c4a",
-              marginTop: "0.75rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            {mensaje}
-          </p>
-        )}
+        {mensaje && <p className="mensaje-exito">{mensaje}</p>}
       </div>
 
-      <div
-        style={{
-          marginBottom: "1.5rem",
-          display: "flex",
-          gap: "1rem",
-          alignItems: "center",
-        }}
-      >
+      <div className="appcc-filtro">
         <select onChange={(e) => setFiltro(e.target.value)}>
           <option value="">Todos los controles</option>
           {TIPOS.map((t) => (
@@ -174,7 +157,7 @@ function Appcc() {
             </option>
           ))}
         </select>
-        <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+        <span className="appcc-incidencias">
           {
             registrosFiltrados.filter((r) => r.resultado === "INCIDENCIA")
               .length
@@ -198,11 +181,11 @@ function Appcc() {
         <tbody>
           {registrosFiltrados.map((r) => (
             <tr key={r.id}>
-              <td style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+              <td className="td-secundario" style={{ fontSize: "0.85rem" }}>
                 {labelTipo(r.tipo)}
               </td>
               <td>{r.descripcion}</td>
-              <td style={{ color: "#7a6a5a" }}>{r.valor || "—"}</td>
+              <td className="td-secundario">{r.valor || "—"}</td>
               <td>
                 <span
                   className={
@@ -214,26 +197,14 @@ function Appcc() {
                   {r.resultado}
                 </span>
               </td>
-              <td style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+              <td className="td-secundario" style={{ fontSize: "0.85rem" }}>
                 {new Date(r.fecha).toLocaleString("es-ES")}
               </td>
-              <td style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+              <td className="td-secundario" style={{ fontSize: "0.85rem" }}>
                 {r.empleado?.nombre || "—"}
               </td>
               <td>
-                <button
-                  onClick={() => abrirEditar(r)}
-                  style={{
-                    background: "#e8f0e0",
-                    color: "#4a6030",
-                    border: "1px solid #6b7c4a",
-                    borderRadius: "6px",
-                    padding: "0.3rem 0.8rem",
-                    cursor: "pointer",
-                    fontSize: "0.8rem",
-                    fontFamily: "Georgia, serif",
-                  }}
-                >
+                <button className="btn-editar" onClick={() => abrirEditar(r)}>
                   ✏️ Editar
                 </button>
               </td>
@@ -242,38 +213,11 @@ function Appcc() {
         </tbody>
       </table>
 
-      {/* Modal editar */}
       {modalEditar && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setModalEditar(null)}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "480px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "1.5rem" }}>Editar registro APPCC</h2>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setModalEditar(null)}>
+          <div className="appcc-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Editar registro APPCC</h2>
+            <div className="appcc-modal-campos">
               <div className="form-row">
                 <select
                   value={editTipo}
@@ -315,20 +259,8 @@ function Appcc() {
                 onChange={(e) => setEditObservaciones(e.target.value)}
               />
             </div>
-            {mensaje && (
-              <p
-                style={{
-                  color: "#c0392b",
-                  fontSize: "0.85rem",
-                  marginTop: "0.75rem",
-                }}
-              >
-                {mensaje}
-              </p>
-            )}
-            <div
-              style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}
-            >
+            {mensaje && <p className="mensaje-error">{mensaje}</p>}
+            <div className="appcc-modal-acciones">
               <button
                 className="btn-primary"
                 onClick={guardarEdicion}
@@ -337,17 +269,8 @@ function Appcc() {
                 Guardar cambios
               </button>
               <button
+                className="btn-cancelar"
                 onClick={() => setModalEditar(null)}
-                style={{
-                  flex: 1,
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
-                }}
               >
                 Cancelar
               </button>

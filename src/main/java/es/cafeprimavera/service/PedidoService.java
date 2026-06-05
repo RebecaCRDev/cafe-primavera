@@ -6,6 +6,7 @@ import es.cafeprimavera.model.LineaPedido;
 import es.cafeprimavera.repository.MesaRepository;
 import es.cafeprimavera.repository.PedidoRepository;
 import es.cafeprimavera.repository.LineaPedidoRepository;
+import es.cafeprimavera.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -16,13 +17,16 @@ public class PedidoService {
     private final PedidoRepository pedidoRepository;
     private final LineaPedidoRepository lineaPedidoRepository;
     private final MesaRepository mesaRepository;
+    private final ProductoRepository productoRepository;
 
     public PedidoService(PedidoRepository pedidoRepository,
                          LineaPedidoRepository lineaPedidoRepository,
-                         MesaRepository mesaRepository) {
+                         MesaRepository mesaRepository,
+                         ProductoRepository productoRepository) {
         this.pedidoRepository = pedidoRepository;
         this.lineaPedidoRepository = lineaPedidoRepository;
         this.mesaRepository = mesaRepository;
+        this.productoRepository = productoRepository;
     }
 
     public List<Pedido> findAll() {
@@ -69,6 +73,18 @@ public class PedidoService {
         double total = lineas.stream()
             .mapToDouble(l -> l.getPrecioUnitario() * l.getCantidad())
             .sum();
+
+        // Descontar stock de cada producto vendido
+        lineas.forEach(l -> {
+            if (l.getProducto() != null) {
+                productoRepository.findById(l.getProducto().getId()).ifPresent(producto -> {
+                    int nuevoStock = Math.max(0, producto.getStock() - l.getCantidad());
+                    producto.setStock(nuevoStock);
+                    productoRepository.save(producto);
+                });
+            }
+        });
+
         pedido.setTotal(total);
         pedido.setMetodoPago(metodoPago);
         pedido.setEstado("PAGADO");
@@ -106,7 +122,7 @@ public class PedidoService {
 
         return pedidoRepository.save(pedido);
     }
-    
+
     public List<Pedido> findByFecha(java.time.LocalDate fecha) {
         java.time.LocalDateTime inicio = fecha.atStartOfDay();
         java.time.LocalDateTime fin = fecha.atTime(23, 59, 59);
@@ -118,6 +134,6 @@ public class PedidoService {
     }
 
     public void deleteLinea(Integer id) {
-    lineaPedidoRepository.deleteById(id);
-}
+        lineaPedidoRepository.deleteById(id);
+    }
 }

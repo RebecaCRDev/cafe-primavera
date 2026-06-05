@@ -95,8 +95,8 @@ function Empleados() {
     <div className="page">
       <h1>Empleados</h1>
 
-      <div className="card" style={{ marginBottom: "2rem" }}>
-        <h2 style={{ marginBottom: "1rem" }}>Nuevo empleado</h2>
+      <div className="card card-formulario">
+        <h2>Nuevo empleado</h2>
         <div className="form-row">
           <input
             placeholder="Nombre *"
@@ -123,17 +123,7 @@ function Empleados() {
             Añadir
           </button>
         </div>
-        {mensaje && (
-          <p
-            style={{
-              color: "#6b7c4a",
-              marginTop: "0.75rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            {mensaje}
-          </p>
-        )}
+        {mensaje && <p className="mensaje-exito">{mensaje}</p>}
       </div>
 
       <table>
@@ -150,7 +140,7 @@ function Empleados() {
           {empleados.map((e) => (
             <tr key={e.id}>
               <td>{e.nombre}</td>
-              <td style={{ color: "#7a6a5a" }}>{e.email}</td>
+              <td className="td-secundario">{e.email}</td>
               <td>
                 <span className={`badge ${rolColor(e.rol)}`}>{e.rol}</span>
               </td>
@@ -164,20 +154,8 @@ function Empleados() {
                 </span>
               </td>
               <td>
-                <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <button
-                    onClick={() => abrirEditar(e)}
-                    style={{
-                      background: "#e8f0e0",
-                      color: "#4a6030",
-                      border: "1px solid #6b7c4a",
-                      borderRadius: "6px",
-                      padding: "0.3rem 0.8rem",
-                      cursor: "pointer",
-                      fontSize: "0.8rem",
-                      fontFamily: "Georgia, serif",
-                    }}
-                  >
+                <div className="empleados-acciones">
+                  <button className="btn-editar" onClick={() => abrirEditar(e)}>
                     ✏️ Editar
                   </button>
                   <button
@@ -194,87 +172,33 @@ function Empleados() {
         </tbody>
       </table>
 
-      {/* Modal editar empleado */}
       {modalEditar && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setModalEditar(null)}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "420px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "1.5rem" }}>Editar empleado</h2>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setModalEditar(null)}>
+          <div className="empleados-modal" onClick={(e) => e.stopPropagation()}>
+            <h2>Editar empleado</h2>
+            <div className="empleados-modal-campos">
               <div>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "#9e8e7e",
-                    display: "block",
-                    marginBottom: "0.3rem",
-                  }}
-                >
-                  Nombre *
-                </label>
+                <label className="form-label">Nombre *</label>
                 <input
+                  className="form-input-full"
                   value={editNombre}
                   onChange={(e) => setEditNombre(e.target.value)}
-                  style={{ width: "100%", fontSize: "0.95rem" }}
                 />
               </div>
               <div>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "#9e8e7e",
-                    display: "block",
-                    marginBottom: "0.3rem",
-                  }}
-                >
-                  Email *
-                </label>
+                <label className="form-label">Email *</label>
                 <input
+                  className="form-input-full"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  style={{ width: "100%", fontSize: "0.95rem" }}
                 />
               </div>
               <div>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "#9e8e7e",
-                    display: "block",
-                    marginBottom: "0.3rem",
-                  }}
-                >
-                  Rol
-                </label>
+                <label className="form-label">Rol</label>
                 <select
+                  className="form-input-full"
                   value={editRol}
                   onChange={(e) => setEditRol(e.target.value)}
-                  style={{ width: "100%", fontSize: "0.95rem" }}
                 >
                   <option value="CAJERO">Cajero</option>
                   <option value="FLORISTA">Florista</option>
@@ -282,14 +206,7 @@ function Empleados() {
                 </select>
               </div>
               <div>
-                <label
-                  style={{
-                    fontSize: "0.82rem",
-                    color: "#9e8e7e",
-                    display: "block",
-                    marginBottom: "0.3rem",
-                  }}
-                >
+                <label className="form-label">
                   Nueva contraseña (dejar vacío para no cambiar)
                 </label>
                 <input
@@ -297,24 +214,12 @@ function Empleados() {
                   placeholder="Nueva contraseña"
                   value={editPassword}
                   onChange={(e) => setEditPassword(e.target.value)}
-                  style={{ width: "100%", fontSize: "0.95rem" }}
+                  className="form-input-full"
                 />
               </div>
             </div>
-            {mensaje && (
-              <p
-                style={{
-                  color: "#c0392b",
-                  fontSize: "0.85rem",
-                  marginTop: "0.75rem",
-                }}
-              >
-                {mensaje}
-              </p>
-            )}
-            <div
-              style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}
-            >
+            {mensaje && <p className="mensaje-error">{mensaje}</p>}
+            <div className="empleados-modal-acciones">
               <button
                 className="btn-primary"
                 onClick={guardarEdicion}
@@ -323,17 +228,8 @@ function Empleados() {
                 Guardar cambios
               </button>
               <button
+                className="btn-cancelar"
                 onClick={() => setModalEditar(null)}
-                style={{
-                  flex: 1,
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
-                }}
               >
                 Cancelar
               </button>

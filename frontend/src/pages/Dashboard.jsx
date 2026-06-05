@@ -196,32 +196,17 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
   const prev = datos ? previsionColor(datos.previsionAfluencia) : null;
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        background: "#f9f5f0",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "2rem",
-      }}
-    >
-      <div style={{ maxWidth: "720px", width: "100%" }}>
+    <div className="dashboard-wrapper">
+      <div className="dashboard-inner">
         {/* Cabecera */}
-        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
-          <div style={{ fontSize: "3rem", marginBottom: "0.5rem" }}>
+        <div className="dashboard-header">
+          <div className="dashboard-emoji">
             {rol === "FLORISTA" ? "🌸" : rol === "CAJERO" ? "☕" : "🌸"}
           </div>
-          <h1
-            style={{
-              fontSize: "1.8rem",
-              color: "#3a3028",
-              marginBottom: "0.3rem",
-            }}
-          >
+          <h1 className="dashboard-titulo">
             Buenos días, {usuario.nombre.split(" ")[0]}
           </h1>
-          <p style={{ color: "#9e8e7e", fontSize: "0.9rem" }}>
+          <p className="dashboard-fecha">
             {new Date().toLocaleDateString("es-ES", {
               weekday: "long",
               year: "numeric",
@@ -231,78 +216,45 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
           </p>
         </div>
 
-        {/* Previsión de afluencia — solo CAJERO y ADMIN */}
+        {/* Previsión de afluencia */}
         {datos && (rol === "CAJERO" || rol === "ADMIN") && prev && (
           <div
-            style={{
-              background: prev.bg,
-              border: `1px solid ${prev.color}`,
-              borderRadius: "12px",
-              padding: "1rem 1.5rem",
-              marginBottom: "1.5rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-            }}
+            className="dashboard-prevision"
+            style={{ background: prev.bg, border: `1px solid ${prev.color}` }}
           >
-            <div style={{ textAlign: "center", minWidth: "80px" }}>
+            <div className="dashboard-prevision-nivel">
               <div
-                style={{
-                  fontSize: "0.7rem",
-                  color: prev.color,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                  marginBottom: "0.2rem",
-                }}
+                className="dashboard-prevision-nivel-label"
+                style={{ color: prev.color }}
               >
                 Afluencia
               </div>
               <div
-                style={{
-                  fontSize: "1rem",
-                  fontWeight: "bold",
-                  color: prev.color,
-                }}
+                className="dashboard-prevision-nivel-valor"
+                style={{ color: prev.color }}
               >
                 {prev.texto}
               </div>
             </div>
-            <p style={{ color: "#3a3028", fontSize: "0.9rem", margin: 0 }}>
+            <p className="dashboard-prevision-texto">
               {datos.previsionDescripcion}
             </p>
           </div>
         )}
 
-        {/* Talleres del día — solo FLORISTA y ADMIN */}
+        {/* Talleres del día */}
         {datos &&
           (rol === "FLORISTA" || rol === "ADMIN") &&
           datos.detalleTalleresHoy?.length > 0 && (
-            <div
-              className="card"
-              style={{
-                marginBottom: "1.5rem",
-                borderLeft: "4px solid #6b7c4a",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "0.85rem",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  color: "#6b7c4a",
-                  marginBottom: "0.75rem",
-                }}
-              >
+            <div className="card dashboard-talleres">
+              <h2 className="dashboard-seccion-title-verde">
                 🌿 Talleres de hoy
               </h2>
               {datos.detalleTalleresHoy.map((t, i) => (
                 <div
                   key={i}
+                  className="dashboard-taller-row"
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "0.5rem 0",
                     borderBottom:
                       i < datos.detalleTalleresHoy.length - 1
                         ? "1px solid #f0e8dc"
@@ -310,22 +262,8 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
                   }}
                 >
                   <div>
-                    <span
-                      style={{
-                        fontSize: "0.9rem",
-                        color: "#3a3028",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      {t.nombre}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "0.82rem",
-                        color: "#9e8e7e",
-                        marginLeft: "0.5rem",
-                      }}
-                    >
+                    <span className="dashboard-taller-nombre">{t.nombre}</span>
+                    <span className="dashboard-taller-hora">
                       a las {t.hora}
                     </span>
                   </div>
@@ -345,116 +283,45 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
 
         {/* Tarjetas */}
         {datos && (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(2, 1fr)",
-              gap: "1rem",
-              marginBottom: "1.5rem",
-            }}
-          >
+          <div className="dashboard-tarjetas">
             {tarjetas.map((item) => (
-              <div
-                key={item.label}
-                className="card"
-                style={{ textAlign: "center", padding: "1.2rem" }}
-              >
-                <div style={{ fontSize: "1.8rem", marginBottom: "0.3rem" }}>
-                  {item.emoji}
-                </div>
+              <div key={item.label} className="card dashboard-tarjeta">
+                <div className="dashboard-tarjeta-emoji">{item.emoji}</div>
                 <div
-                  style={{
-                    fontSize: "1.6rem",
-                    fontWeight: "bold",
-                    color: item.color,
-                  }}
+                  className="dashboard-tarjeta-valor"
+                  style={{ color: item.color }}
                 >
                   {item.valor}
                 </div>
-                <div
-                  style={{
-                    color: "#9e8e7e",
-                    fontSize: "0.8rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                  }}
-                >
-                  {item.label}
-                </div>
+                <div className="dashboard-tarjeta-label">{item.label}</div>
               </div>
             ))}
           </div>
         )}
 
         {/* Resumen IA */}
-        <div
-          className="card"
-          style={{ marginBottom: "1.5rem", borderLeft: "4px solid #6b7c4a" }}
-        >
-          <h2
-            style={{
-              fontSize: "0.85rem",
-              textTransform: "uppercase",
-              letterSpacing: "0.1em",
-              color: "#6b7c4a",
-              marginBottom: "0.75rem",
-            }}
-          >
+        <div className="card dashboard-resumen">
+          <h2 className="dashboard-seccion-title-verde">
             ✨ Previsión del día
           </h2>
           {cargando ? (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                color: "#9e8e7e",
-              }}
-            >
-              <div
-                style={{
-                  width: "16px",
-                  height: "16px",
-                  border: "2px solid #c8b89a",
-                  borderTopColor: "#6b7c4a",
-                  borderRadius: "50%",
-                  animation: "spin 1s linear infinite",
-                }}
-              ></div>
+            <div className="dashboard-cargando">
+              <div className="dashboard-spinner"></div>
               Preparando la previsión del día...
             </div>
           ) : (
-            <p
-              style={{
-                color: "#3a3028",
-                lineHeight: "1.7",
-                fontSize: "0.95rem",
-              }}
-            >
-              {resumen}
-            </p>
+            <p className="dashboard-resumen-texto">{resumen}</p>
           )}
         </div>
 
         {/* Stock crítico cafetería */}
         {datos?.productosCriticosCafeteria?.length > 0 &&
           (rol === "CAJERO" || rol === "ADMIN") && (
-            <div
-              className="card"
-              style={{ marginBottom: "1rem", borderLeft: "4px solid #c0392b" }}
-            >
-              <h2
-                style={{
-                  fontSize: "0.85rem",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  color: "#c0392b",
-                  marginBottom: "0.75rem",
-                }}
-              >
+            <div className="card dashboard-stock-cafe">
+              <h2 className="dashboard-seccion-title-rojo">
                 ⚠️ Cafetería — reponer hoy
               </h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div className="dashboard-badges">
                 {datos.productosCriticosCafeteria.map((p) => (
                   <span key={p} className="badge badge-red">
                     {p}
@@ -467,28 +334,13 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
         {/* Stock crítico floristería */}
         {datos?.productosCriticosFloristeria?.length > 0 &&
           (rol === "FLORISTA" || rol === "ADMIN") && (
-            <div
-              className="card"
-              style={{ marginBottom: "1rem", borderLeft: "4px solid #e67e22" }}
-            >
-              <h2
-                style={{
-                  fontSize: "0.85rem",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  color: "#e67e22",
-                  marginBottom: "0.75rem",
-                }}
-              >
+            <div className="card dashboard-stock-flor">
+              <h2 className="dashboard-seccion-title-naranja">
                 ⚠️ Floristería — reponer hoy
               </h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div className="dashboard-badges">
                 {datos.productosCriticosFloristeria.map((p) => (
-                  <span
-                    key={p}
-                    className="badge"
-                    style={{ background: "#fef3e2", color: "#e67e22" }}
-                  >
+                  <span key={p} className="badge badge-naranja">
                     {p}
                   </span>
                 ))}
@@ -499,31 +351,13 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
         {/* Flores caducando */}
         {datos?.nombresFloresCaducando?.length > 0 &&
           (rol === "FLORISTA" || rol === "ADMIN") && (
-            <div
-              className="card"
-              style={{
-                marginBottom: "1.5rem",
-                borderLeft: "4px solid #9b59b6",
-              }}
-            >
-              <h2
-                style={{
-                  fontSize: "0.85rem",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.1em",
-                  color: "#9b59b6",
-                  marginBottom: "0.75rem",
-                }}
-              >
+            <div className="card dashboard-flores">
+              <h2 className="dashboard-seccion-title-morado">
                 🕐 Flores próximas a caducar
               </h2>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              <div className="dashboard-badges">
                 {datos.nombresFloresCaducando.map((p) => (
-                  <span
-                    key={p}
-                    className="badge"
-                    style={{ background: "#f5eef8", color: "#9b59b6" }}
-                  >
+                  <span key={p} className="badge badge-morado">
                     {p}
                   </span>
                 ))}
@@ -531,16 +365,7 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
             </div>
           )}
 
-        <button
-          onClick={onEntrar}
-          className="btn-primary"
-          style={{
-            width: "100%",
-            padding: "1rem",
-            fontSize: "1rem",
-            letterSpacing: "0.08em",
-          }}
-        >
+        <button onClick={onEntrar} className="btn-primary dashboard-btn-entrar">
           Entrar a la aplicación →
         </button>
       </div>

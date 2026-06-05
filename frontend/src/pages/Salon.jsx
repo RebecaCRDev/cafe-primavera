@@ -225,7 +225,6 @@ function Salon() {
   const cambio = importeEntregado
     ? Math.max(0, parseFloat(importeEntregado) - totalPedido)
     : null;
-
   const productosFiltrados = filtroCategoria
     ? productos.filter((p) => p.categoria?.id === parseInt(filtroCategoria))
     : productos;
@@ -313,15 +312,7 @@ function Salon() {
     <div className="page">
       <h1>Salón</h1>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "1.5rem",
-          justifyContent: "center",
-          marginBottom: "2rem",
-          flexWrap: "wrap",
-        }}
-      >
+      <div className="salon-leyenda">
         {[
           { color: "#6b7c4a", bg: "#e8f0e0", label: `Libre (${libres})` },
           { color: "#c0392b", bg: "#f5e8e8", label: `Ocupada (${ocupadas})` },
@@ -331,152 +322,35 @@ function Salon() {
             label: `Reservada (${reservadas})`,
           },
         ].map((item) => (
-          <span
-            key={item.label}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              fontSize: "0.85rem",
-            }}
-          >
+          <span key={item.label} className="salon-leyenda-item">
             <span
-              style={{
-                width: "16px",
-                height: "16px",
-                background: item.bg,
-                border: `2px solid ${item.color}`,
-                borderRadius: "50%",
-                display: "inline-block",
-              }}
+              className="salon-leyenda-circulo"
+              style={{ background: item.bg, border: `2px solid ${item.color}` }}
             ></span>
             {item.label}
           </span>
         ))}
       </div>
 
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <div
-          style={{ position: "relative", width: "700px", minHeight: "620px" }}
-        >
-          <div
-            style={{
-              position: "relative",
-              height: "100px",
-              background: "#f0f7e8",
-              border: "2px dashed #6b7c4a",
-              borderRadius: "10px",
-              marginBottom: "8px",
-            }}
-          >
-            <span
-              style={{
-                color: "#6b7c4a",
-                fontSize: "0.75rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                position: "absolute",
-                top: "8px",
-                left: "12px",
-              }}
-            >
-              🌿 Terraza
-            </span>
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: "50%",
-                transform: "translateX(-50%)",
-                width: "70px",
-                height: "14px",
-                background: "#c8b89a",
-                borderRadius: "0 0 8px 8px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "0.55rem",
-                color: "#7a6a5a",
-              }}
-            >
-              🚪 PUERTA
-            </div>
+      <div className="salon-wrapper">
+        <div className="salon-inner">
+          <div className="salon-terraza">
+            <span className="salon-terraza-label">🌿 Terraza</span>
+            <div className="salon-puerta">🚪 PUERTA</div>
             <Mesa numero="T1" top="24px" left="80px" />
             <Mesa numero="T2" top="24px" left="550px" />
           </div>
-          <div
-            style={{
-              position: "relative",
-              height: "500px",
-              background: "#faf6f1",
-              border: "2px solid #c8b89a",
-              borderRadius: "16px",
-              overflow: "hidden",
-            }}
-          >
-            <span
-              style={{
-                color: "#7a6a5a",
-                fontSize: "0.75rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.1em",
-                position: "absolute",
-                top: "10px",
-                left: "14px",
-              }}
-            >
-              🏠 Interior
-            </span>
-            <div
-              style={{
-                position: "absolute",
-                top: "30px",
-                right: "20px",
-                width: "55px",
-                height: "220px",
-                background: "#e8ddd0",
-                borderRadius: "8px",
-                border: "2px solid #c8b89a",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <span
-                style={{
-                  fontSize: "0.65rem",
-                  color: "#7a6a5a",
-                  writingMode: "vertical-rl",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                }}
-              >
-                ☕ Barra
-              </span>
+          <div className="salon-interior">
+            <span className="salon-interior-label">🏠 Interior</span>
+            <div className="salon-barra">
+              <span className="salon-barra-label">☕ Barra</span>
             </div>
             <SillaBarra numero="B1" top="38px" left="588px" />
             <SillaBarra numero="B2" top="82px" left="588px" />
             <SillaBarra numero="B3" top="126px" left="588px" />
             <SillaBarra numero="B4" top="170px" left="588px" />
             <SillaBarra numero="B5" top="214px" left="588px" />
-            <div
-              style={{
-                position: "absolute",
-                bottom: "20px",
-                right: "20px",
-                width: "110px",
-                height: "80px",
-                background: "#f0ece8",
-                border: "2px solid #c8b89a",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "0.7rem",
-                color: "#7a6a5a",
-                textAlign: "center",
-              }}
-            >
+            <div className="salon-escaleras">
               🪜 Escaleras
               <br />
               talleres
@@ -502,38 +376,10 @@ function Salon() {
 
       {/* MODAL OPCIONES */}
       {modal === "opciones" && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={cerrarModal}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "360px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "0.5rem" }}>
-              Mesa {mesaActiva?.numero}
-            </h2>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.85rem",
-                marginBottom: "1.5rem",
-              }}
-            >
+        <div className="modal-overlay" onClick={cerrarModal}>
+          <div className="modal-salon" onClick={(e) => e.stopPropagation()}>
+            <h2>Mesa {mesaActiva?.numero}</h2>
+            <p className="modal-salon-desc">
               ¿Qué quieres hacer con esta mesa?
             </p>
             <button
@@ -548,31 +394,15 @@ function Salon() {
               🪑 Ocupar mesa
             </button>
             <div style={{ borderTop: "1px solid #e8ddd0", paddingTop: "1rem" }}>
-              <p
-                style={{
-                  color: "#7a6a5a",
-                  fontSize: "0.85rem",
-                  marginBottom: "0.75rem",
-                  fontWeight: "bold",
-                }}
-              >
-                📅 Reservar mesa
-              </p>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.6rem",
-                  marginBottom: "0.75rem",
-                }}
-              >
+              <p className="modal-salon-reservar-titulo">📅 Reservar mesa</p>
+              <div className="modal-salon-reservar-campos">
                 <input
                   placeholder="Nombre del cliente *"
                   value={nombreReserva}
                   onChange={(e) => setNombreReserva(e.target.value)}
                   style={{ fontSize: "0.9rem" }}
                 />
-                <div style={{ display: "flex", gap: "0.5rem" }}>
+                <div className="modal-salon-reservar-fila">
                   <input
                     type="time"
                     value={horaReserva}
@@ -591,46 +421,18 @@ function Salon() {
                 </div>
               </div>
               {mensaje && (
-                <p
-                  style={{
-                    color: "#c0392b",
-                    fontSize: "0.8rem",
-                    marginBottom: "0.5rem",
-                  }}
-                >
+                <p className="mensaje-error" style={{ marginBottom: "0.5rem" }}>
                   {mensaje}
                 </p>
               )}
-              <button
-                onClick={reservarMesa}
-                style={{
-                  width: "100%",
-                  background: "#fef3e2",
-                  border: "1px solid #e67e22",
-                  color: "#e67e22",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  fontFamily: "Georgia, serif",
-                  fontSize: "0.9rem",
-                }}
-              >
+              <button className="btn-reservar-confirmar" onClick={reservarMesa}>
                 Confirmar reserva
               </button>
             </div>
             <button
+              className="btn-cancelar"
               onClick={cerrarModal}
-              style={{
-                width: "100%",
-                background: "#f0ece8",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.75rem",
-                cursor: "pointer",
-                color: "#7a6a5a",
-                fontFamily: "Georgia, serif",
-                marginTop: "0.75rem",
-              }}
+              style={{ width: "100%", marginTop: "0.75rem" }}
             >
               Cancelar
             </button>
@@ -640,69 +442,15 @@ function Salon() {
 
       {/* MODAL RESERVADA */}
       {modal === "reservada" && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={cerrarModal}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "320px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "0.5rem" }}>
-              Mesa {mesaActiva?.numero}
-            </h2>
-            <span
-              style={{
-                background: "#fef3e2",
-                color: "#e67e22",
-                padding: "0.2rem 0.8rem",
-                borderRadius: "12px",
-                fontSize: "0.8rem",
-              }}
-            >
-              RESERVADA
-            </span>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.85rem",
-                margin: "1rem 0 1.5rem",
-              }}
-            >
-              ¿Qué quieres hacer?
-            </p>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
+        <div className="modal-overlay" onClick={cerrarModal}>
+          <div className="modal-reservada" onClick={(e) => e.stopPropagation()}>
+            <h2>Mesa {mesaActiva?.numero}</h2>
+            <span className="modal-reservada-badge">RESERVADA</span>
+            <p className="modal-reservada-desc">¿Qué quieres hacer?</p>
+            <div className="modal-reservada-acciones">
               <button
+                className="btn-ver-reserva"
                 onClick={() => setModal("verReserva")}
-                style={{
-                  background: "#fef3e2",
-                  border: "1px solid #e67e22",
-                  color: "#e67e22",
-                  borderRadius: "6px",
-                  padding: "0.85rem",
-                  cursor: "pointer",
-                  fontFamily: "Georgia, serif",
-                }}
               >
                 👁 Ver datos de la reserva
               </button>
@@ -721,16 +469,9 @@ function Salon() {
                 ✕ Cancelar reserva
               </button>
               <button
+                className="btn-cancelar"
                 onClick={cerrarModal}
-                style={{
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
-                }}
+                style={{ width: "100%" }}
               >
                 Cerrar
               </button>
@@ -742,36 +483,16 @@ function Salon() {
       {/* MODAL VER RESERVA */}
       {modal === "verReserva" && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1001,
-          }}
+          className="modal-overlay"
+          style={{ zIndex: 1001 }}
           onClick={() => setModal("reservada")}
         >
           <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "340px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
+            className="modal-ver-reserva"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ marginBottom: "1.5rem" }}>Datos de la reserva</h2>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-                marginBottom: "1.5rem",
-              }}
-            >
+            <h2>Datos de la reserva</h2>
+            <div className="modal-ver-reserva-campos">
               {[
                 { label: "Mesa", valor: mesaActiva?.numero },
                 { label: "Nombre", valor: mesaActiva?.nombreReserva || "—" },
@@ -786,17 +507,14 @@ function Salon() {
               ].map((item, i, arr) => (
                 <div
                   key={item.label}
+                  className="modal-ver-reserva-fila"
                   style={{
-                    display: "flex",
-                    justifyContent: "space-between",
                     borderBottom:
                       i < arr.length - 1 ? "1px solid #f0e8dc" : "none",
                     paddingBottom: i < arr.length - 1 ? "0.75rem" : 0,
                   }}
                 >
-                  <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
-                    {item.label}
-                  </span>
+                  <span className="modal-ver-reserva-label">{item.label}</span>
                   <span
                     style={{
                       color: "#3a3028",
@@ -809,17 +527,9 @@ function Salon() {
               ))}
             </div>
             <button
+              className="btn-cancelar"
               onClick={() => setModal("reservada")}
-              style={{
-                width: "100%",
-                background: "#f0ece8",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.75rem",
-                cursor: "pointer",
-                color: "#7a6a5a",
-                fontFamily: "Georgia, serif",
-              }}
+              style={{ width: "100%" }}
             >
               Volver
             </button>
@@ -829,44 +539,10 @@ function Salon() {
 
       {/* MODAL PEDIDO */}
       {modal === "pedido" && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={cerrarModal}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "0",
-              width: "860px",
-              maxHeight: "85vh",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-              display: "flex",
-              overflow: "hidden",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Panel izquierdo - Productos */}
-            <div
-              style={{
-                flex: 1,
-                padding: "1.5rem",
-                overflowY: "auto",
-                background: "#f9f5f0",
-                borderRight: "1px solid #e8ddd0",
-              }}
-            >
-              <h2 style={{ marginBottom: "1rem", fontSize: "1rem" }}>
-                Añadir productos
-              </h2>
+        <div className="modal-overlay" onClick={cerrarModal}>
+          <div className="modal-pedido" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-pedido-productos">
+              <h2 className="modal-pedido-titulo">Añadir productos</h2>
               <select
                 value={filtroCategoria}
                 onChange={(e) => setFiltroCategoria(e.target.value)}
@@ -883,85 +559,26 @@ function Salon() {
                   </option>
                 ))}
               </select>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(130px, 1fr))",
-                  gap: "0.75rem",
-                }}
-              >
+              <div className="modal-pedido-grid">
                 {productosFiltrados.map((p) => (
                   <button
                     key={p.id}
                     onClick={() => añadirProducto(p)}
-                    style={{
-                      background: "#fff",
-                      border: "1px solid #e8ddd0",
-                      borderRadius: "8px",
-                      padding: "0.8rem",
-                      cursor: "pointer",
-                      textAlign: "center",
-                      fontFamily: "Georgia, serif",
-                      transition: "all 0.2s",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "#6b7c4a";
-                      e.currentTarget.style.boxShadow =
-                        "0 2px 8px rgba(107,124,74,0.2)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "#e8ddd0";
-                      e.currentTarget.style.boxShadow = "none";
-                    }}
+                    className="modal-pedido-btn-producto"
                   >
-                    <div
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: "0.8rem",
-                        marginBottom: "0.2rem",
-                        color: "#3a3028",
-                      }}
-                    >
-                      {p.nombre}
-                    </div>
-                    <div style={{ color: "#6b7c4a", fontSize: "0.95rem" }}>
-                      {p.precio}€
-                    </div>
+                    <div className="modal-pedido-btn-nombre">{p.nombre}</div>
+                    <div className="modal-pedido-btn-precio">{p.precio}€</div>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Panel derecho - Pedido */}
-            <div
-              style={{
-                width: "300px",
-                minWidth: "300px",
-                padding: "1.5rem",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "1rem",
-                }}
-              >
-                <h2 style={{ fontSize: "1rem" }}>Mesa {mesaActiva?.numero}</h2>
-                <span
-                  style={{
-                    background: "#f5e8e8",
-                    color: "#c0392b",
-                    padding: "0.2rem 0.7rem",
-                    borderRadius: "12px",
-                    fontSize: "0.75rem",
-                  }}
-                >
-                  OCUPADA
-                </span>
+            <div className="modal-pedido-panel">
+              <div className="modal-pedido-header">
+                <h2 className="modal-pedido-header-titulo">
+                  Mesa {mesaActiva?.numero}
+                </h2>
+                <span className="badge-ocupada">OCUPADA</span>
               </div>
               {cargando && (
                 <p
@@ -974,82 +591,35 @@ function Salon() {
                   Cargando...
                 </p>
               )}
-              <div style={{ flex: 1, overflowY: "auto" }}>
+              <div className="modal-pedido-lineas">
                 {lineasPedido.length === 0 ? (
-                  <p
-                    style={{
-                      color: "#b0a090",
-                      textAlign: "center",
-                      marginTop: "2rem",
-                      fontSize: "0.85rem",
-                      fontStyle: "italic",
-                    }}
-                  >
+                  <p className="modal-pedido-vacio">
                     Pulsa un producto para añadirlo
                   </p>
                 ) : (
                   lineasPedido.map((l) => (
-                    <div
-                      key={l.id}
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        padding: "0.6rem 0",
-                        borderBottom: "1px solid #f0e8dc",
-                      }}
-                    >
+                    <div key={l.id} className="modal-pedido-linea">
                       <div>
-                        <div style={{ fontSize: "0.85rem", color: "#3a3028" }}>
+                        <div className="modal-pedido-linea-info">
                           {l.producto?.nombre}
                         </div>
-                        <div style={{ fontSize: "0.75rem", color: "#9e8e7e" }}>
+                        <div className="modal-pedido-linea-precio">
                           {l.precioUnitario}€ × {l.cantidad}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.4rem",
-                        }}
-                      >
+                      <div className="modal-pedido-linea-controles">
                         <button
+                          className="btn-quitar"
                           onClick={() => quitarProducto(l)}
-                          style={{
-                            background: "#f5e8e8",
-                            color: "#c0392b",
-                            border: "none",
-                            borderRadius: "4px",
-                            width: "22px",
-                            height: "22px",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                          }}
                         >
                           −
                         </button>
-                        <span
-                          style={{
-                            fontSize: "0.85rem",
-                            minWidth: "16px",
-                            textAlign: "center",
-                          }}
-                        >
+                        <span className="modal-pedido-cantidad">
                           {l.cantidad}
                         </span>
                         <button
+                          className="btn-añadir"
                           onClick={() => añadirProducto(l.producto)}
-                          style={{
-                            background: "#e8f0e0",
-                            color: "#4a6030",
-                            border: "none",
-                            borderRadius: "4px",
-                            width: "22px",
-                            height: "22px",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                          }}
                         >
                           +
                         </button>
@@ -1059,42 +629,14 @@ function Salon() {
                 )}
               </div>
 
-              <div
-                style={{
-                  borderTop: "1px solid #e8ddd0",
-                  paddingTop: "1rem",
-                  marginTop: "1rem",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: "#9e8e7e",
-                      fontSize: "0.85rem",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Total
-                  </span>
-                  <span style={{ fontSize: "1.5rem", color: "#3a3028" }}>
+              <div className="modal-pedido-footer">
+                <div className="modal-pedido-total-row">
+                  <span className="modal-pedido-total-label">Total</span>
+                  <span className="modal-pedido-total-valor">
                     {totalPedido.toFixed(2)}€
                   </span>
                 </div>
-
-                {/* Selector método de pago */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "0.5rem",
-                    marginBottom: "0.75rem",
-                  }}
-                >
+                <div className="modal-pedido-metodos">
                   {["EFECTIVO", "TARJETA"].map((mp) => (
                     <button
                       key={mp}
@@ -1102,27 +644,16 @@ function Salon() {
                         setMetodoPago(mp);
                         setImporteEntregado("");
                       }}
-                      style={{
-                        flex: 1,
-                        padding: "0.5rem",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontFamily: "Georgia, serif",
-                        fontSize: "0.85rem",
-                        border:
-                          metodoPago === mp
-                            ? "2px solid #6b7c4a"
-                            : "1px solid #e8ddd0",
-                        background: metodoPago === mp ? "#e8f0e0" : "#f9f5f0",
-                        color: metodoPago === mp ? "#4a6030" : "#7a6a5a",
-                      }}
+                      className={
+                        metodoPago === mp
+                          ? "modal-pedido-metodo-activo"
+                          : "modal-pedido-metodo-inactivo"
+                      }
                     >
                       {mp === "EFECTIVO" ? "💵 Efectivo" : "💳 Tarjeta"}
                     </button>
                   ))}
                 </div>
-
-                {/* Campo importe entregado solo para efectivo */}
                 {metodoPago === "EFECTIVO" && (
                   <div style={{ marginBottom: "0.75rem" }}>
                     <input
@@ -1140,34 +671,17 @@ function Salon() {
                     />
                     {importeEntregado &&
                       parseFloat(importeEntregado) >= totalPedido && (
-                        <div
-                          style={{
-                            background: "#e8f0e0",
-                            borderRadius: "6px",
-                            padding: "0.5rem 0.75rem",
-                            display: "flex",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <span
-                            style={{ color: "#4a6030", fontSize: "0.85rem" }}
-                          >
+                        <div className="modal-pedido-cambio">
+                          <span className="modal-pedido-cambio-label">
                             Cambio
                           </span>
-                          <span
-                            style={{
-                              color: "#4a6030",
-                              fontWeight: "bold",
-                              fontSize: "1rem",
-                            }}
-                          >
+                          <span className="modal-pedido-cambio-valor">
                             {cambio?.toFixed(2)}€
                           </span>
                         </div>
                       )}
                   </div>
                 )}
-
                 <button
                   onClick={cobrar}
                   className="btn-primary"
@@ -1186,18 +700,7 @@ function Salon() {
                 >
                   Cancelar / Invitar
                 </button>
-                {mensaje && (
-                  <p
-                    style={{
-                      color: "#c0392b",
-                      textAlign: "center",
-                      marginTop: "0.5rem",
-                      fontSize: "0.8rem",
-                    }}
-                  >
-                    {mensaje}
-                  </p>
-                )}
+                {mensaje && <p className="modal-pedido-error">{mensaje}</p>}
               </div>
             </div>
           </div>
@@ -1207,45 +710,16 @@ function Salon() {
       {/* MODAL CANCELAR */}
       {modal === "cancelar" && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1001,
-          }}
+          className="modal-overlay"
+          style={{ zIndex: 1001 }}
           onClick={() => setModal("pedido")}
         >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "380px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "0.5rem" }}>Cancelar pedido</h2>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.85rem",
-                marginBottom: "1rem",
-              }}
-            >
+          <div className="modal-cancelar" onClick={(e) => e.stopPropagation()}>
+            <h2>Cancelar pedido</h2>
+            <p className="modal-cancelar-desc">
               El pedido se registrará como pérdida. Indica el motivo:
             </p>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.5rem",
-                marginBottom: "1rem",
-              }}
-            >
+            <div className="modal-cancelar-motivos">
               {[
                 "Cliente se fue sin pagar",
                 "Invitación de la casa",
@@ -1255,17 +729,11 @@ function Salon() {
                 <button
                   key={m}
                   onClick={() => setMotivoCancelacion(m)}
-                  style={{
-                    background: motivoCancelacion === m ? "#e8f0e0" : "#f9f5f0",
-                    border: `1px solid ${motivoCancelacion === m ? "#6b7c4a" : "#e8ddd0"}`,
-                    borderRadius: "6px",
-                    padding: "0.6rem",
-                    cursor: "pointer",
-                    textAlign: "left",
-                    fontSize: "0.85rem",
-                    color: "#3a3028",
-                    fontFamily: "Georgia, serif",
-                  }}
+                  className={
+                    motivoCancelacion === m
+                      ? "modal-cancelar-motivo-activo"
+                      : "modal-cancelar-motivo-inactivo"
+                  }
                 >
                   {m}
                 </button>
@@ -1277,7 +745,7 @@ function Salon() {
                 style={{ fontSize: "0.85rem" }}
               />
             </div>
-            <div style={{ display: "flex", gap: "0.75rem" }}>
+            <div className="modal-cancelar-acciones">
               <button
                 className="btn-danger"
                 onClick={cancelarPedido}
@@ -1286,17 +754,8 @@ function Salon() {
                 Confirmar cancelación
               </button>
               <button
+                className="btn-cancelar"
                 onClick={() => setModal("pedido")}
-                style={{
-                  flex: 1,
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
-                }}
               >
                 Volver
               </button>

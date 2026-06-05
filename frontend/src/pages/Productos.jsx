@@ -192,32 +192,14 @@ function Productos() {
 
       {/* Alerta stock crítico */}
       {stockCritico.length > 0 && (
-        <div
-          style={{
-            background: "#fef5e7",
-            border: "1px solid #e67e22",
-            borderRadius: "10px",
-            padding: "1rem 1.5rem",
-            marginBottom: "1rem",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "1rem",
-          }}
-        >
-          <span style={{ fontSize: "1.3rem" }}>⚠️</span>
+        <div className="alerta alerta-stock">
+          <span className="alerta-icono">⚠️</span>
           <div>
-            <p
-              style={{
-                color: "#e67e22",
-                fontWeight: "bold",
-                fontSize: "0.9rem",
-                marginBottom: "0.4rem",
-              }}
-            >
+            <p className="alerta-titulo-stock">
               {stockCritico.length} producto{stockCritico.length > 1 ? "s" : ""}{" "}
               con stock crítico
             </p>
-            <p style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+            <p className="alerta-texto">
               {stockCritico
                 .map((p) => `${p.nombre} (${p.stock} ud.)`)
                 .join(" · ")}
@@ -228,33 +210,15 @@ function Productos() {
 
       {/* Alerta flores caducidad */}
       {esFlorista && floresCaducidad.length > 0 && (
-        <div
-          style={{
-            background: "#fdecea",
-            border: "1px solid #c0392b",
-            borderRadius: "10px",
-            padding: "1rem 1.5rem",
-            marginBottom: "2rem",
-            display: "flex",
-            alignItems: "flex-start",
-            gap: "1rem",
-          }}
-        >
-          <span style={{ fontSize: "1.3rem" }}>🌸</span>
+        <div className="alerta alerta-caducidad">
+          <span className="alerta-icono">🌸</span>
           <div>
-            <p
-              style={{
-                color: "#c0392b",
-                fontWeight: "bold",
-                fontSize: "0.9rem",
-                marginBottom: "0.4rem",
-              }}
-            >
+            <p className="alerta-titulo-caducidad">
               {floresCaducidad.length} producto
               {floresCaducidad.length > 1 ? "s" : ""} con caducidad próxima o
               vencida
             </p>
-            <p style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+            <p className="alerta-texto">
               {floresCaducidad
                 .map((p) => {
                   const dias = diasHastaCaducidad(
@@ -273,8 +237,8 @@ function Productos() {
       )}
 
       {/* Formulario nuevo producto */}
-      <div className="card" style={{ marginBottom: "2rem" }}>
-        <h2 style={{ marginBottom: "1rem" }}>Añadir producto</h2>
+      <div className="card card-formulario">
+        <h2>Añadir producto</h2>
         <div className="form-row">
           <input
             placeholder="Nombre *"
@@ -313,9 +277,8 @@ function Productos() {
           </button>
         </div>
 
-        {/* Campos extra para floristería */}
         {esFlor && (
-          <div className="form-row" style={{ marginTop: "0.75rem" }}>
+          <div className="form-row form-row-flor">
             <input
               type="date"
               value={fechaCaducidad}
@@ -343,30 +306,12 @@ function Productos() {
           </div>
         )}
 
-        {mensaje && (
-          <p
-            style={{
-              color: "#6b7c4a",
-              marginTop: "0.75rem",
-              fontSize: "0.9rem",
-            }}
-          >
-            {mensaje}
-          </p>
-        )}
+        {mensaje && <p className="mensaje-exito">{mensaje}</p>}
       </div>
 
       {/* Filtro y buscador */}
-      <div
-        style={{
-          marginBottom: "1.5rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "1rem",
-          justifyContent: "space-between",
-        }}
-      >
-        <div style={{ display: "flex", gap: "1rem", flex: 1 }}>
+      <div className="filtro-container">
+        <div className="filtro-inputs">
           <input
             placeholder="🔍 Buscar producto..."
             value={busqueda}
@@ -388,13 +333,7 @@ function Productos() {
             ))}
           </select>
         </div>
-        <span
-          style={{
-            color: "#9e8e7e",
-            fontSize: "0.85rem",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <span className="filtro-info">
           {productosFiltrados.length} productos · página {pagina} de{" "}
           {totalPaginas || 1}
         </span>
@@ -426,41 +365,23 @@ function Productos() {
             return (
               <tr key={p.id} style={{ background: filaBackground }}>
                 <td>{p.nombre}</td>
-                <td style={{ color: "#7a6a5a" }}>{p.categoria?.nombre}</td>
-                <td style={{ color: "#6b7c4a" }}>{p.precio}€</td>
+                <td className="td-secundario">{p.categoria?.nombre}</td>
+                <td className="td-precio">{p.precio}€</td>
                 <td>
-                  <span
-                    style={{
-                      color: p.stock < 10 ? "#c0392b" : "#3a3028",
-                      fontWeight: p.stock < 10 ? "bold" : "normal",
-                    }}
-                  >
+                  <span className={p.stock < 10 ? "stock-critico" : "stock-ok"}>
                     {p.stock} {p.stock < 10 && "⚠️"}
                   </span>
                 </td>
                 {esFlorista && (
                   <td>
                     {p.productoFlor?.fechaCaducidad ? (
-                      <span
-                        style={{
-                          color:
-                            estado === "caducado"
-                              ? "#c0392b"
-                              : estado === "proximo"
-                                ? "#e67e22"
-                                : "#3a3028",
-                          fontWeight: estado !== "ok" ? "bold" : "normal",
-                          fontSize: "0.85rem",
-                        }}
-                      >
+                      <span className={`caducidad-${estado}`}>
                         {formatFecha(p.productoFlor.fechaCaducidad)}
                         {estado === "caducado" && " ⛔"}
                         {estado === "proximo" && " ⚠️"}
                       </span>
                     ) : (
-                      <span style={{ color: "#c8b89a", fontSize: "0.85rem" }}>
-                        —
-                      </span>
+                      <span className="caducidad-sin">—</span>
                     )}
                   </td>
                 )}
@@ -475,21 +396,12 @@ function Productos() {
                 </td>
                 <td>
                   <button
+                    className="btn-gestionar"
                     onClick={() => {
                       setModalGestion(p);
                       setCantidad("");
                       setMotivo("");
                       setTipoMovimiento("COMPRA");
-                    }}
-                    style={{
-                      background: "#e8f0e0",
-                      color: "#4a6030",
-                      border: "1px solid #6b7c4a",
-                      borderRadius: "6px",
-                      padding: "0.3rem 0.8rem",
-                      cursor: "pointer",
-                      fontSize: "0.8rem",
-                      fontFamily: "Georgia, serif",
                     }}
                   >
                     Gestionar stock
@@ -503,44 +415,18 @@ function Productos() {
 
       {/* Paginación */}
       {totalPaginas > 1 && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "0.5rem",
-            marginTop: "1.5rem",
-          }}
-        >
+        <div className="paginacion">
           <button
+            className="paginacion-btn"
             onClick={() => setPagina(1)}
             disabled={pagina === 1}
-            style={{
-              background: pagina === 1 ? "#f0ece8" : "#e8f0e0",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.4rem 0.7rem",
-              cursor: pagina === 1 ? "default" : "pointer",
-              color: pagina === 1 ? "#b0a090" : "#4a6030",
-              fontFamily: "Georgia, serif",
-              fontSize: "0.85rem",
-            }}
           >
             «
           </button>
           <button
+            className="paginacion-btn"
             onClick={() => setPagina((p) => Math.max(1, p - 1))}
             disabled={pagina === 1}
-            style={{
-              background: pagina === 1 ? "#f0ece8" : "#e8f0e0",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.4rem 0.7rem",
-              cursor: pagina === 1 ? "default" : "pointer",
-              color: pagina === 1 ? "#b0a090" : "#4a6030",
-              fontFamily: "Georgia, serif",
-              fontSize: "0.85rem",
-            }}
           >
             ‹
           </button>
@@ -556,27 +442,18 @@ function Productos() {
             }, [])
             .map((item, i) =>
               item === "..." ? (
-                <span
-                  key={`dots-${i}`}
-                  style={{ color: "#9e8e7e", fontSize: "0.85rem" }}
-                >
+                <span key={`dots-${i}`} className="filtro-info">
                   …
                 </span>
               ) : (
                 <button
                   key={item}
                   onClick={() => setPagina(item)}
-                  style={{
-                    background: pagina === item ? "#6b7c4a" : "#f9f5f0",
-                    border: pagina === item ? "none" : "1px solid #e8ddd0",
-                    borderRadius: "6px",
-                    padding: "0.4rem 0.75rem",
-                    cursor: "pointer",
-                    color: pagina === item ? "#fff" : "#7a6a5a",
-                    fontFamily: "Georgia, serif",
-                    fontSize: "0.85rem",
-                    fontWeight: pagina === item ? "bold" : "normal",
-                  }}
+                  className={
+                    pagina === item
+                      ? "paginacion-btn-activo"
+                      : "paginacion-btn-inactivo"
+                  }
                 >
                   {item}
                 </button>
@@ -584,34 +461,16 @@ function Productos() {
             )}
 
           <button
+            className="paginacion-btn"
             onClick={() => setPagina((p) => Math.min(totalPaginas, p + 1))}
             disabled={pagina === totalPaginas}
-            style={{
-              background: pagina === totalPaginas ? "#f0ece8" : "#e8f0e0",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.4rem 0.7rem",
-              cursor: pagina === totalPaginas ? "default" : "pointer",
-              color: pagina === totalPaginas ? "#b0a090" : "#4a6030",
-              fontFamily: "Georgia, serif",
-              fontSize: "0.85rem",
-            }}
           >
             ›
           </button>
           <button
+            className="paginacion-btn"
             onClick={() => setPagina(totalPaginas)}
             disabled={pagina === totalPaginas}
-            style={{
-              background: pagina === totalPaginas ? "#f0ece8" : "#e8f0e0",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.4rem 0.7rem",
-              cursor: pagina === totalPaginas ? "default" : "pointer",
-              color: pagina === totalPaginas ? "#b0a090" : "#4a6030",
-              fontFamily: "Georgia, serif",
-              fontSize: "0.85rem",
-            }}
           >
             »
           </button>
@@ -620,74 +479,32 @@ function Productos() {
 
       {/* Modal gestión de stock */}
       {modalGestion && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setModalGestion(null)}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "400px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "0.3rem" }}>Gestionar stock</h2>
-            <p
-              style={{
-                color: "#7a6a5a",
-                fontSize: "0.9rem",
-                marginBottom: "0.3rem",
-              }}
-            >
-              {modalGestion.nombre}
-            </p>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.85rem",
-                marginBottom: "1.5rem",
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setModalGestion(null)}>
+          <div className="modal-contenido" onClick={(e) => e.stopPropagation()}>
+            <h2>Gestionar stock</h2>
+            <p className="modal-subtitulo">{modalGestion.nombre}</p>
+            <p className="modal-info">
               Stock actual:{" "}
-              <span
-                style={{
-                  color: modalGestion.stock < 10 ? "#c0392b" : "#3a3028",
-                  fontWeight: "bold",
-                }}
-              >
+              <span className={modalGestion.stock < 10 ? "stock-critico" : ""}>
                 {modalGestion.stock} unidades
               </span>
               {modalGestion.productoFlor?.fechaCaducidad && (
                 <span
-                  style={{
-                    marginLeft: "1rem",
-                    color:
-                      estadoCaducidad(
-                        modalGestion.productoFlor.fechaCaducidad,
-                      ) === "caducado"
-                        ? "#c0392b"
-                        : "#e67e22",
-                  }}
+                  className={
+                    estadoCaducidad(
+                      modalGestion.productoFlor.fechaCaducidad,
+                    ) === "caducado"
+                      ? "stock-critico"
+                      : "caducidad-proximo"
+                  }
+                  style={{ marginLeft: "1rem" }}
                 >
                   · Caduca:{" "}
                   {formatFecha(modalGestion.productoFlor.fechaCaducidad)}
                 </span>
               )}
             </p>
-            <div
-              style={{ display: "flex", gap: "0.5rem", marginBottom: "1.2rem" }}
-            >
+            <div className="modal-tipos">
               {[
                 {
                   valor: "COMPRA",
@@ -711,44 +528,14 @@ function Productos() {
                     setTipoMovimiento(t.valor);
                     setCantidad("");
                   }}
-                  style={{
-                    flex: 1,
-                    padding: "0.6rem 0.4rem",
-                    borderRadius: "8px",
-                    cursor: "pointer",
-                    border:
-                      tipoMovimiento === t.valor
-                        ? "2px solid #6b7c4a"
-                        : "1px solid #e8ddd0",
-                    background:
-                      tipoMovimiento === t.valor ? "#e8f0e0" : "#f9f5f0",
-                    color: tipoMovimiento === t.valor ? "#4a6030" : "#7a6a5a",
-                    fontFamily: "Georgia, serif",
-                    fontSize: "0.8rem",
-                    textAlign: "center",
-                  }}
+                  className={`modal-tipo-btn ${tipoMovimiento === t.valor ? "modal-tipo-activo" : "modal-tipo-inactivo"}`}
                 >
                   <div>{t.label}</div>
-                  <div
-                    style={{
-                      fontSize: "0.7rem",
-                      marginTop: "0.2rem",
-                      opacity: 0.8,
-                    }}
-                  >
-                    {t.desc}
-                  </div>
+                  <div className="modal-tipo-desc">{t.desc}</div>
                 </button>
               ))}
             </div>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.82rem",
-                marginBottom: "1rem",
-                fontStyle: "italic",
-              }}
-            >
+            <p className="modal-desc">
               {tipoMovimiento === "COMPRA" &&
                 "Introduce las unidades que has recibido. Se sumarán al stock actual."}
               {tipoMovimiento === "AJUSTE" &&
@@ -766,49 +553,25 @@ function Productos() {
               }
               value={cantidad}
               onChange={(e) => setCantidad(e.target.value)}
-              style={{
-                width: "100%",
-                fontSize: "0.95rem",
-                marginBottom: "0.75rem",
-              }}
+              className="modal-input"
             />
             <input
               placeholder="Motivo (opcional)"
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
-              style={{
-                width: "100%",
-                fontSize: "0.9rem",
-                marginBottom: "1rem",
-              }}
+              className="modal-input-motivo"
             />
             {nuevoStock !== null && (
-              <div
-                style={{
-                  background: "#f0f7e8",
-                  border: "1px solid #6b7c4a",
-                  borderRadius: "8px",
-                  padding: "0.75rem 1rem",
-                  marginBottom: "1rem",
-                  display: "flex",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+              <div className="modal-resultado">
+                <span className="modal-resultado-label">
                   Nuevo stock resultante
                 </span>
-                <span
-                  style={{
-                    color: "#4a6030",
-                    fontWeight: "bold",
-                    fontSize: "1rem",
-                  }}
-                >
+                <span className="modal-resultado-valor">
                   {nuevoStock} unidades
                 </span>
               </div>
             )}
-            <div style={{ display: "flex", gap: "0.75rem" }}>
+            <div className="modal-acciones">
               <button
                 className="btn-primary"
                 onClick={confirmarMovimiento}
@@ -817,17 +580,8 @@ function Productos() {
                 Confirmar
               </button>
               <button
+                className="btn-cancelar"
                 onClick={() => setModalGestion(null)}
-                style={{
-                  flex: 1,
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
-                }}
               >
                 Cancelar
               </button>

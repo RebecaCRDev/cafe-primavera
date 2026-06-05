@@ -182,34 +182,19 @@ function Eventos() {
     const hoy = new Date();
     const fechaTaller = new Date(e.fechaHora);
     const esPassado = fechaTaller < hoy;
+
     return (
-      <div className="card" style={{ borderLeft: "4px solid #6b7c4a" }}>
-        <h2 style={{ marginBottom: "0.5rem", color: "#3a3028" }}>{e.nombre}</h2>
-        <p
-          style={{ color: "#7a6a5a", fontSize: "0.9rem", marginBottom: "1rem" }}
-        >
-          {e.descripcion}
-        </p>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "0.4rem",
-          }}
-        >
-          <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>Fecha</span>
-          <span style={{ color: "#3a3028", fontSize: "0.85rem" }}>
+      <div className="card tarjeta-taller">
+        <h2 className="tarjeta-taller-titulo">{e.nombre}</h2>
+        <p className="tarjeta-taller-desc">{e.descripcion}</p>
+        <div className="tarjeta-taller-fila">
+          <span className="tarjeta-taller-label">Fecha</span>
+          <span className="tarjeta-taller-valor">
             {new Date(e.fechaHora).toLocaleString("es-ES")}
           </span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "0.4rem",
-          }}
-        >
-          <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>Plazas</span>
+        <div className="tarjeta-taller-fila">
+          <span className="tarjeta-taller-label">Plazas</span>
           <span
             style={{
               color: e.plazasDisponibles === 0 ? "#c0392b" : "#6b7c4a",
@@ -220,73 +205,34 @@ function Eventos() {
             {e.plazasDisponibles} / {e.plazasTotales}
           </span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "1rem",
-          }}
-        >
-          <span style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>Precio</span>
-          <span style={{ color: "#3a3028", fontSize: "0.85rem" }}>
-            {e.precio}€
-          </span>
+        <div className="tarjeta-taller-fila" style={{ marginBottom: "1rem" }}>
+          <span className="tarjeta-taller-label">Precio</span>
+          <span className="tarjeta-taller-valor">{e.precio}€</span>
         </div>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            flexWrap: "wrap",
-            gap: "0.5rem",
-          }}
-        >
-          <span className="badge badge-green">{e.tipo}</span>
-          {esPassado && (
-            <span className="badge badge-red" style={{ marginLeft: "0.5rem" }}>
-              REALIZADO
-            </span>
-          )}
-          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+        <div className="tarjeta-taller-footer">
+          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+            <span className="badge badge-green">{e.tipo}</span>
+            {esPassado && <span className="badge badge-red">REALIZADO</span>}
+          </div>
+          <div className="tarjeta-taller-acciones">
             <button
+              className="btn-ver-reservas"
               onClick={() => setModalReservas(e)}
-              style={{
-                background: "#f0ece8",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.3rem 0.8rem",
-                cursor: "pointer",
-                fontSize: "0.8rem",
-                color: "#7a6a5a",
-                fontFamily: "Georgia, serif",
-              }}
             >
               Ver reservas ({reservasEvento.length})
             </button>
             {mostrarEditar && (
-              <button
-                onClick={() => abrirEditar(e)}
-                style={{
-                  background: "#e8f0e0",
-                  border: "1px solid #6b7c4a",
-                  borderRadius: "6px",
-                  padding: "0.3rem 0.8rem",
-                  cursor: "pointer",
-                  fontSize: "0.8rem",
-                  color: "#4a6030",
-                  fontFamily: "Georgia, serif",
-                }}
-              >
+              <button className="btn-editar" onClick={() => abrirEditar(e)}>
                 ✏️ Editar
               </button>
             )}
             <button
+              className="btn-primary"
+              style={{ padding: "0.3rem 0.8rem", fontSize: "0.8rem" }}
               onClick={() => {
                 setEventoSeleccionado(e);
                 setMensaje("");
               }}
-              className="btn-primary"
-              style={{ padding: "0.3rem 0.8rem", fontSize: "0.8rem" }}
               disabled={e.plazasDisponibles === 0 || esPassado}
             >
               + Reservar
@@ -301,14 +247,7 @@ function Eventos() {
     <div className="page">
       <h1>Talleres</h1>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          gap: "0.5rem",
-          marginBottom: "2rem",
-        }}
-      >
+      <div className="talleres-vistas">
         {[
           { id: "talleres", label: "Todos los talleres" },
           { id: "semana", label: "Esta semana" },
@@ -317,32 +256,18 @@ function Eventos() {
           <button
             key={v.id}
             onClick={() => setVistaActiva(v.id)}
-            style={{
-              padding: "0.5rem 1.2rem",
-              borderRadius: "20px",
-              border:
-                vistaActiva === v.id
-                  ? "2px solid #6b7c4a"
-                  : "1px solid #e8ddd0",
-              background: vistaActiva === v.id ? "#e8f0e0" : "#fff",
-              color: vistaActiva === v.id ? "#4a6030" : "#7a6a5a",
-              cursor: "pointer",
-              fontFamily: "Georgia, serif",
-              fontSize: "0.85rem",
-            }}
+            className={
+              vistaActiva === v.id
+                ? "talleres-vista-btn-activo"
+                : "talleres-vista-btn-inactivo"
+            }
           >
             {v.label}
           </button>
         ))}
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          marginBottom: "1.5rem",
-        }}
-      >
+      <div className="talleres-nuevo-btn">
         <button
           className="btn-primary"
           onClick={() => setMostrarFormulario(!mostrarFormulario)}
@@ -352,8 +277,8 @@ function Eventos() {
       </div>
 
       {mostrarFormulario && (
-        <div className="card" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ marginBottom: "1rem" }}>Nuevo taller</h2>
+        <div className="card card-formulario">
+          <h2>Nuevo taller</h2>
           <div className="form-row" style={{ marginBottom: "0.75rem" }}>
             <input
               placeholder="Nombre *"
@@ -404,28 +329,12 @@ function Eventos() {
               Crear taller
             </button>
           </div>
-          {mensaje && (
-            <p
-              style={{
-                color: "#6b7c4a",
-                marginTop: "0.75rem",
-                fontSize: "0.9rem",
-              }}
-            >
-              {mensaje}
-            </p>
-          )}
+          {mensaje && <p className="mensaje-exito">{mensaje}</p>}
         </div>
       )}
 
       {vistaActiva === "talleres" && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
+        <div className="talleres-grid">
           {eventos.map((e) => (
             <TarjetaTaller key={e.id} e={e} />
           ))}
@@ -434,14 +343,7 @@ function Eventos() {
 
       {vistaActiva === "semana" && (
         <div>
-          <p
-            style={{
-              color: "#9e8e7e",
-              fontSize: "0.85rem",
-              textAlign: "center",
-              marginBottom: "1.5rem",
-            }}
-          >
+          <p className="talleres-semana-info">
             {lunes.toLocaleDateString("es-ES", {
               day: "numeric",
               month: "long",
@@ -454,23 +356,11 @@ function Eventos() {
             })}
           </p>
           {talleresEstaSemana.length === 0 ? (
-            <p
-              style={{
-                color: "#b0a090",
-                textAlign: "center",
-                fontStyle: "italic",
-              }}
-            >
+            <p className="talleres-semana-vacio">
               No hay talleres programados esta semana
             </p>
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
+            <div className="talleres-grid">
               {talleresEstaSemana.map((e) => (
                 <TarjetaTaller key={e.id} e={e} />
               ))}
@@ -495,9 +385,9 @@ function Eventos() {
             {reservas.map((r) => (
               <tr key={r.id}>
                 <td>{r.cliente?.nombre || "—"}</td>
-                <td style={{ color: "#7a6a5a" }}>{r.evento?.nombre}</td>
-                <td style={{ color: "#7a6a5a" }}>{r.numPersonas || 1}</td>
-                <td style={{ color: "#7a6a5a" }}>
+                <td className="td-secundario">{r.evento?.nombre}</td>
+                <td className="td-secundario">{r.numPersonas || 1}</td>
+                <td className="td-secundario">
                   {new Date(r.fechaReserva).toLocaleString("es-ES")}
                 </td>
                 <td>
@@ -523,54 +413,24 @@ function Eventos() {
         </table>
       )}
 
+      {/* Modal nueva reserva */}
       {eventoSeleccionado && (
         <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
+          className="modal-overlay"
           onClick={() => setEventoSeleccionado(null)}
         >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "400px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "0.3rem" }}>Nueva reserva</h2>
-            <p
-              style={{
-                color: "#7a6a5a",
-                fontSize: "0.9rem",
-                marginBottom: "0.5rem",
-              }}
-            >
+          <div className="modal-taller" onClick={(e) => e.stopPropagation()}>
+            <h2>Nueva reserva</h2>
+            <p className="modal-taller-subtitulo">
               {eventoSeleccionado.nombre}
             </p>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.82rem",
-                marginBottom: "1.2rem",
-              }}
-            >
+            <p className="modal-taller-plazas">
               Plazas disponibles:{" "}
-              <span style={{ color: "#6b7c4a", fontWeight: "bold" }}>
+              <span className="modal-taller-plazas-valor">
                 {eventoSeleccionado.plazasDisponibles}
               </span>
             </p>
-            <div
-              style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem" }}
-            >
+            <div className="modal-taller-inputs">
               <input
                 placeholder="Nombre del cliente *"
                 value={nombreCliente}
@@ -587,18 +447,8 @@ function Eventos() {
                 style={{ flex: 1, fontSize: "0.95rem" }}
               />
             </div>
-            {mensaje && (
-              <p
-                style={{
-                  color: "#c0392b",
-                  fontSize: "0.85rem",
-                  marginBottom: "0.75rem",
-                }}
-              >
-                {mensaje}
-              </p>
-            )}
-            <div style={{ display: "flex", gap: "0.75rem" }}>
+            {mensaje && <p className="mensaje-error">{mensaje}</p>}
+            <div className="modal-taller-acciones">
               <button
                 className="btn-primary"
                 onClick={crearReserva}
@@ -607,19 +457,10 @@ function Eventos() {
                 Confirmar reserva
               </button>
               <button
+                className="btn-cancelar"
                 onClick={() => {
                   setEventoSeleccionado(null);
                   setMensaje("");
-                }}
-                style={{
-                  flex: 1,
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
                 }}
               >
                 Cancelar
@@ -629,50 +470,17 @@ function Eventos() {
         </div>
       )}
 
+      {/* Modal ver reservas */}
       {modalReservas && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setModalReservas(null)}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "480px",
-              maxHeight: "80vh",
-              overflowY: "auto",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h2 style={{ marginBottom: "0.3rem" }}>{modalReservas.nombre}</h2>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.85rem",
-                marginBottom: "1.5rem",
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setModalReservas(null)}>
+          <div className="modal-reservas" onClick={(e) => e.stopPropagation()}>
+            <h2>{modalReservas.nombre}</h2>
+            <p className="modal-reservas-info">
               {new Date(modalReservas.fechaHora).toLocaleString("es-ES")} ·{" "}
               {reservasDeEvento(modalReservas.id).length} reservas activas
             </p>
             {reservasDeEvento(modalReservas.id).length === 0 ? (
-              <p
-                style={{
-                  color: "#b0a090",
-                  fontStyle: "italic",
-                  textAlign: "center",
-                }}
-              >
+              <p className="modal-reservas-vacio">
                 No hay reservas activas para este taller
               </p>
             ) : (
@@ -715,18 +523,8 @@ function Eventos() {
               </table>
             )}
             <button
+              className="modal-reservas-cerrar"
               onClick={() => setModalReservas(null)}
-              style={{
-                width: "100%",
-                background: "#f0ece8",
-                border: "none",
-                borderRadius: "6px",
-                padding: "0.75rem",
-                cursor: "pointer",
-                color: "#7a6a5a",
-                fontFamily: "Georgia, serif",
-                marginTop: "1.5rem",
-              }}
             >
               Cerrar
             </button>
@@ -734,37 +532,15 @@ function Eventos() {
         </div>
       )}
 
+      {/* Modal editar taller */}
       {modalEditar && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setModalEditar(null)}
-        >
+        <div className="modal-overlay" onClick={() => setModalEditar(null)}>
           <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "480px",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
-            }}
+            className="modal-editar-taller"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 style={{ marginBottom: "1.5rem" }}>Editar taller</h2>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
+            <h2>Editar taller</h2>
+            <div className="modal-editar-campos">
               <div className="form-row">
                 <input
                   placeholder="Nombre *"
@@ -810,20 +586,8 @@ function Eventos() {
                 onChange={(e) => setEditFecha(e.target.value)}
               />
             </div>
-            {mensaje && (
-              <p
-                style={{
-                  color: "#c0392b",
-                  fontSize: "0.85rem",
-                  marginTop: "0.75rem",
-                }}
-              >
-                {mensaje}
-              </p>
-            )}
-            <div
-              style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}
-            >
+            {mensaje && <p className="mensaje-error">{mensaje}</p>}
+            <div className="modal-editar-acciones">
               <button
                 className="btn-primary"
                 onClick={guardarEdicion}
@@ -832,17 +596,8 @@ function Eventos() {
                 Guardar cambios
               </button>
               <button
+                className="btn-cancelar"
                 onClick={() => setModalEditar(null)}
-                style={{
-                  flex: 1,
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.75rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
-                }}
               >
                 Cancelar
               </button>

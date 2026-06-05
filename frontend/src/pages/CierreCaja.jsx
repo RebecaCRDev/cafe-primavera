@@ -229,79 +229,31 @@ function CierreCaja() {
 
       {/* Resumen del día */}
       {dashboard && (
-        <div className="card" style={{ marginBottom: "2rem" }}>
-          <h2 style={{ marginBottom: "1.2rem" }}>Resumen de hoy</h2>
+        <div className="card card-formulario">
+          <h2>Resumen de hoy</h2>
           <div
+            className="caja-tarjetas"
             style={{
-              display: "grid",
               gridTemplateColumns: `repeat(${tarjetasResumenHoy().length}, 1fr)`,
-              gap: "1rem",
-              marginBottom: "1.5rem",
             }}
           >
             {tarjetasResumenHoy().map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  background: "#f9f5f0",
-                  borderRadius: "10px",
-                  padding: "1rem",
-                  textAlign: "center",
-                  border: "1px solid #e8ddd0",
-                }}
-              >
-                <div
-                  style={{
-                    color: "#9e8e7e",
-                    fontSize: "0.8rem",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.08em",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  {item.label}
-                </div>
-                <div
-                  style={{
-                    color: "#4a6030",
-                    fontSize: "1.5rem",
-                    fontWeight: "bold",
-                  }}
-                >
-                  {item.valor}
-                </div>
+              <div key={item.label} className="caja-tarjeta">
+                <div className="caja-tarjeta-label">{item.label}</div>
+                <div className="caja-tarjeta-valor">{item.valor}</div>
               </div>
             ))}
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "1rem",
-              background: "#e8f0e0",
-              borderRadius: "10px",
-              marginBottom: "1rem",
-            }}
-          >
-            <span
-              style={{
-                color: "#4a6030",
-                fontSize: "0.9rem",
-                textTransform: "uppercase",
-                letterSpacing: "0.08em",
-              }}
-            >
+          <div className="caja-total">
+            <span className="caja-total-label">
               {rol === "CAJERO"
                 ? "Total cafetería hoy"
                 : rol === "FLORISTA"
                   ? "Total floristería hoy"
                   : "Total del día"}
             </span>
-            <span
-              style={{ color: "#4a6030", fontSize: "2rem", fontWeight: "bold" }}
-            >
+            <span className="caja-total-valor">
               {rol === "CAJERO"
                 ? (dashboard.ingresosCafeteria || 0).toFixed(2)
                 : rol === "FLORISTA"
@@ -312,14 +264,7 @@ function CierreCaja() {
           </div>
 
           {rol !== "FLORISTA" && (
-            <div
-              style={{
-                display: "flex",
-                gap: "2rem",
-                color: "#9e8e7e",
-                fontSize: "0.85rem",
-              }}
-            >
+            <div className="caja-stats">
               <span>
                 Pedidos cobrados:{" "}
                 <strong style={{ color: "#3a3028" }}>
@@ -337,30 +282,14 @@ function CierreCaja() {
         </div>
       )}
 
-      {/* Cierre de caja — solo CAJERO y ADMIN */}
+      {/* Cierre de caja */}
       {cierreHoy ? (
-        <div
-          className="card"
-          style={{ marginBottom: "2rem", borderLeft: "4px solid #6b7c4a" }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.75rem",
-              marginBottom: "1rem",
-            }}
-          >
+        <div className="card caja-cerrada">
+          <div className="caja-cerrada-header">
             <span style={{ fontSize: "1.5rem" }}>✅</span>
             <h2>Caja cerrada hoy</h2>
           </div>
-          <p
-            style={{
-              color: "#7a6a5a",
-              fontSize: "0.85rem",
-              marginBottom: "1rem",
-            }}
-          >
+          <p className="caja-cerrada-info">
             Cerrada el {new Date(cierreHoy.createdAt).toLocaleString("es-ES")}{" "}
             por {cierreHoy.empleado?.nombre}
           </p>
@@ -410,55 +339,28 @@ function CierreCaja() {
                       },
                     ]),
             ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  background: "#f9f5f0",
-                  borderRadius: "8px",
-                  padding: "0.75rem",
-                  textAlign: "center",
-                }}
-              >
+              <div key={item.label} className="caja-tarjeta">
+                <div className="caja-tarjeta-label">{item.label}</div>
                 <div
-                  style={{
-                    color: "#9e8e7e",
-                    fontSize: "0.78rem",
-                    textTransform: "uppercase",
-                    marginBottom: "0.3rem",
-                  }}
+                  className="caja-tarjeta-valor"
+                  style={{ fontSize: "1rem" }}
                 >
-                  {item.label}
-                </div>
-                <div style={{ color: "#4a6030", fontWeight: "bold" }}>
                   {item.valor}
                 </div>
               </div>
             ))}
           </div>
           {cierreHoy.observaciones && (
-            <p
-              style={{
-                color: "#7a6a5a",
-                fontSize: "0.85rem",
-                marginTop: "1rem",
-                fontStyle: "italic",
-              }}
-            >
+            <p className="caja-cerrada-obs">
               Observaciones: {cierreHoy.observaciones}
             </p>
           )}
         </div>
       ) : (
         rol !== "FLORISTA" && (
-          <div className="card" style={{ marginBottom: "2rem" }}>
-            <h2 style={{ marginBottom: "1rem" }}>Cerrar caja</h2>
-            <p
-              style={{
-                color: "#9e8e7e",
-                fontSize: "0.85rem",
-                marginBottom: "1rem",
-              }}
-            >
+          <div className="card card-formulario">
+            <h2>Cerrar caja</h2>
+            <p className="caja-obs">
               Al cerrar la caja se registrará el resumen del día con los totales
               actuales.
             </p>
@@ -466,23 +368,9 @@ function CierreCaja() {
               placeholder="Observaciones (opcional)"
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
-              style={{
-                width: "100%",
-                fontSize: "0.95rem",
-                marginBottom: "1rem",
-              }}
+              className="caja-input"
             />
-            {mensaje && (
-              <p
-                style={{
-                  color: "#c0392b",
-                  fontSize: "0.85rem",
-                  marginBottom: "1rem",
-                }}
-              >
-                {mensaje}
-              </p>
-            )}
+            {mensaje && <p className="mensaje-error">{mensaje}</p>}
             {!confirmar ? (
               <button
                 className="btn-primary"
@@ -492,25 +380,12 @@ function CierreCaja() {
                 Cerrar caja del día
               </button>
             ) : (
-              <div
-                style={{
-                  background: "#fef5e7",
-                  border: "1px solid #e67e22",
-                  borderRadius: "10px",
-                  padding: "1rem",
-                }}
-              >
-                <p
-                  style={{
-                    color: "#e67e22",
-                    fontSize: "0.9rem",
-                    marginBottom: "1rem",
-                  }}
-                >
+              <div className="caja-confirmar">
+                <p className="caja-confirmar-texto">
                   ¿Confirmas el cierre de caja? Esta acción no se puede
                   deshacer.
                 </p>
-                <div style={{ display: "flex", gap: "0.75rem" }}>
+                <div className="caja-confirmar-acciones">
                   <button
                     className="btn-primary"
                     onClick={cerrarCaja}
@@ -520,17 +395,8 @@ function CierreCaja() {
                     {cargando ? "Cerrando..." : "Sí, cerrar caja"}
                   </button>
                   <button
+                    className="btn-cancelar"
                     onClick={() => setConfirmar(false)}
-                    style={{
-                      flex: 1,
-                      background: "#f0ece8",
-                      border: "none",
-                      borderRadius: "6px",
-                      padding: "0.75rem",
-                      cursor: "pointer",
-                      color: "#7a6a5a",
-                      fontFamily: "Georgia, serif",
-                    }}
                   >
                     Cancelar
                   </button>
@@ -543,29 +409,14 @@ function CierreCaja() {
 
       {/* Calendario */}
       <div className="card">
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "1.5rem",
-          }}
-        >
+        <div className="calendario-nav">
           <button
+            className="calendario-btn"
             onClick={() =>
               setMesActual(
                 new Date(mesActual.getFullYear(), mesActual.getMonth() - 1, 1),
               )
             }
-            style={{
-              background: "#f0ece8",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.4rem 0.8rem",
-              cursor: "pointer",
-              color: "#7a6a5a",
-              fontFamily: "Georgia, serif",
-            }}
           >
             ‹
           </button>
@@ -576,64 +427,25 @@ function CierreCaja() {
             })}
           </h2>
           <button
+            className="calendario-btn"
             onClick={() =>
               setMesActual(
                 new Date(mesActual.getFullYear(), mesActual.getMonth() + 1, 1),
               )
             }
-            style={{
-              background: "#f0ece8",
-              border: "none",
-              borderRadius: "6px",
-              padding: "0.4rem 0.8rem",
-              cursor: "pointer",
-              color: "#7a6a5a",
-              fontFamily: "Georgia, serif",
-            }}
           >
             ›
           </button>
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(7, 1fr)",
-            gap: "0.4rem",
-            marginBottom: "0.5rem",
-          }}
-        >
+        <div className="calendario-cabecera">
           {["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"].map((d) => (
-            <div
-              key={d}
-              style={{
-                textAlign: "center",
-                fontSize: "0.75rem",
-                color: "#9e8e7e",
-                fontWeight: "bold",
-                padding: "0.3rem 0",
-              }}
-            >
+            <div key={d} className="calendario-dia-label">
               {d}
             </div>
           ))}
         </div>
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(7, 1fr)",
-            gap: "0.4rem",
-          }}
-        >
-          {renderCalendario()}
-        </div>
-        <p
-          style={{
-            color: "#9e8e7e",
-            fontSize: "0.8rem",
-            marginTop: "1rem",
-            textAlign: "center",
-          }}
-        >
+        <div className="calendario-grid">{renderCalendario()}</div>
+        <p className="calendario-nota">
           Los días en verde tienen cierre de caja registrado. Pulsa para ver el
           detalle.
         </p>
@@ -641,38 +453,9 @@ function CierreCaja() {
 
       {/* Modal detalle del día */}
       {modalDia && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.5)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setModalDia(null)}
-        >
-          <div
-            style={{
-              background: "#fff",
-              borderRadius: "16px",
-              padding: "2rem",
-              width: "680px",
-              maxHeight: "85vh",
-              overflowY: "auto",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginBottom: "1.5rem",
-              }}
-            >
+        <div className="modal-overlay" onClick={() => setModalDia(null)}>
+          <div className="modal-caja" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-caja-header">
               <div>
                 <h2 style={{ marginBottom: "0.3rem" }}>
                   {new Date(modalDia.fecha + "T12:00:00").toLocaleDateString(
@@ -685,36 +468,20 @@ function CierreCaja() {
                     },
                   )}
                 </h2>
-                <p style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                <p className="modal-caja-subtitulo">
                   Cerrada por {modalDia.empleado?.nombre}
                 </p>
               </div>
               <button
+                className="calendario-btn"
                 onClick={() => setModalDia(null)}
-                style={{
-                  background: "#f0ece8",
-                  border: "none",
-                  borderRadius: "6px",
-                  padding: "0.4rem 0.8rem",
-                  cursor: "pointer",
-                  color: "#7a6a5a",
-                  fontFamily: "Georgia, serif",
-                }}
               >
                 ✕
               </button>
             </div>
 
-            {/* Resumen del cierre */}
             {rol !== "FLORISTA" && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(3, 1fr)",
-                  gap: "0.75rem",
-                  marginBottom: "1rem",
-                }}
-              >
+              <div className="modal-caja-resumen">
                 {[
                   {
                     label: "Efectivo",
@@ -729,95 +496,27 @@ function CierreCaja() {
                     valor: modalDia.totalGeneral?.toFixed(2) + "€",
                   },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      background: "#f0f7e8",
-                      borderRadius: "8px",
-                      padding: "0.75rem",
-                      textAlign: "center",
-                      border: "1px solid #6b7c4a",
-                    }}
-                  >
-                    <div
-                      style={{
-                        color: "#6b7c4a",
-                        fontSize: "0.78rem",
-                        textTransform: "uppercase",
-                        marginBottom: "0.3rem",
-                      }}
-                    >
-                      {item.label}
-                    </div>
-                    <div
-                      style={{
-                        color: "#4a6030",
-                        fontWeight: "bold",
-                        fontSize: "1.1rem",
-                      }}
-                    >
-                      {item.valor}
-                    </div>
+                  <div key={item.label} className="modal-caja-tarjeta">
+                    <div className="modal-caja-tarjeta-label">{item.label}</div>
+                    <div className="modal-caja-tarjeta-valor">{item.valor}</div>
                   </div>
                 ))}
               </div>
             )}
 
-            {/* Desglose por área */}
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: "0.75rem",
-                marginBottom: "1.5rem",
-              }}
-            >
+            <div className="modal-caja-desglose">
               {(rol === "ADMIN" || rol === "CAJERO") && (
-                <div
-                  style={{
-                    background: "#f9f5f0",
-                    borderRadius: "8px",
-                    padding: "0.75rem",
-                    textAlign: "center",
-                    border: "1px solid #e8ddd0",
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#9e8e7e",
-                      fontSize: "0.78rem",
-                      textTransform: "uppercase",
-                      marginBottom: "0.3rem",
-                    }}
-                  >
-                    ☕ Cafetería
-                  </div>
-                  <div style={{ color: "#4a6030", fontWeight: "bold" }}>
+                <div className="modal-caja-area">
+                  <div className="modal-caja-area-label">☕ Cafetería</div>
+                  <div className="modal-caja-area-valor">
                     {modalDia.totalCafeteria?.toFixed(2)}€
                   </div>
                 </div>
               )}
               {(rol === "ADMIN" || rol === "FLORISTA") && (
-                <div
-                  style={{
-                    background: "#f9f5f0",
-                    borderRadius: "8px",
-                    padding: "0.75rem",
-                    textAlign: "center",
-                    border: "1px solid #e8ddd0",
-                  }}
-                >
-                  <div
-                    style={{
-                      color: "#9e8e7e",
-                      fontSize: "0.78rem",
-                      textTransform: "uppercase",
-                      marginBottom: "0.3rem",
-                    }}
-                  >
-                    🌸 Floristería
-                  </div>
-                  <div style={{ color: "#4a6030", fontWeight: "bold" }}>
+                <div className="modal-caja-area">
+                  <div className="modal-caja-area-label">🌸 Floristería</div>
+                  <div className="modal-caja-area-valor">
                     {modalDia.totalFloristeria?.toFixed(2)}€
                   </div>
                 </div>
@@ -825,15 +524,7 @@ function CierreCaja() {
             </div>
 
             {rol !== "FLORISTA" && (
-              <div
-                style={{
-                  display: "flex",
-                  gap: "2rem",
-                  color: "#9e8e7e",
-                  fontSize: "0.85rem",
-                  marginBottom: "1.5rem",
-                }}
-              >
+              <div className="modal-caja-stats">
                 <span>
                   Pedidos cobrados:{" "}
                   <strong style={{ color: "#3a3028" }}>
@@ -854,30 +545,13 @@ function CierreCaja() {
               </div>
             )}
 
-            {/* Detalle de pedidos */}
             {cargandoModal ? (
-              <p
-                style={{
-                  color: "#9e8e7e",
-                  textAlign: "center",
-                  padding: "2rem",
-                }}
-              >
-                Cargando pedidos...
-              </p>
+              <p className="modal-caja-cargando">Cargando pedidos...</p>
             ) : (
               <>
                 {pedidosPagados.length > 0 && (
                   <div style={{ marginBottom: "1.5rem" }}>
-                    <h3
-                      style={{
-                        color: "#4a6030",
-                        fontSize: "0.9rem",
-                        marginBottom: "1rem",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                      }}
-                    >
+                    <h3 className="modal-caja-seccion-title-verde">
                       {rol === "FLORISTA"
                         ? "Ventas floristería"
                         : `Pedidos cobrados (${pedidosPagados.length})`}
@@ -892,86 +566,36 @@ function CierreCaja() {
                         0,
                       );
                       return (
-                        <div
-                          key={p.id}
-                          style={{
-                            border: "1px solid #e8ddd0",
-                            borderRadius: "8px",
-                            padding: "0.75rem 1rem",
-                            marginBottom: "0.75rem",
-                          }}
-                        >
-                          <div
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              marginBottom: "0.5rem",
-                            }}
-                          >
-                            <span
-                              style={{
-                                fontSize: "0.85rem",
-                                color: "#3a3028",
-                                fontWeight: "bold",
-                              }}
-                            >
+                        <div key={p.id} className="modal-caja-pedido">
+                          <div className="modal-caja-pedido-header">
+                            <span className="modal-caja-pedido-titulo">
                               {p.mesa ? `Mesa ${p.mesa.numero}` : "Mostrador"} ·{" "}
                               {new Date(p.fecha).toLocaleTimeString("es-ES", {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}
                             </span>
-                            <div
-                              style={{
-                                display: "flex",
-                                gap: "0.75rem",
-                                alignItems: "center",
-                              }}
-                            >
+                            <div className="modal-caja-pedido-acciones">
                               {rol !== "FLORISTA" && (
                                 <span
-                                  style={{
-                                    fontSize: "0.78rem",
-                                    background:
-                                      p.metodoPago === "EFECTIVO"
-                                        ? "#e8f0e0"
-                                        : "#e8f0f8",
-                                    color:
-                                      p.metodoPago === "EFECTIVO"
-                                        ? "#4a6030"
-                                        : "#2c5f8a",
-                                    padding: "0.1rem 0.5rem",
-                                    borderRadius: "10px",
-                                  }}
+                                  className={
+                                    p.metodoPago === "EFECTIVO"
+                                      ? "badge-metodo-efectivo"
+                                      : "badge-metodo-tarjeta"
+                                  }
                                 >
                                   {p.metodoPago === "EFECTIVO" ? "💵" : "💳"}{" "}
                                   {p.metodoPago}
                                 </span>
                               )}
-                              <span
-                                style={{ color: "#4a6030", fontWeight: "bold" }}
-                              >
+                              <span className="modal-caja-total">
                                 {totalFiltrado.toFixed(2)}€
                               </span>
                             </div>
                           </div>
-                          <div
-                            style={{
-                              borderTop: "1px solid #f0e8dc",
-                              paddingTop: "0.5rem",
-                            }}
-                          >
+                          <div className="modal-caja-pedido-lineas">
                             {lineasFiltradas.map((l) => (
-                              <div
-                                key={l.id}
-                                style={{
-                                  display: "flex",
-                                  justifyContent: "space-between",
-                                  fontSize: "0.8rem",
-                                  color: "#7a6a5a",
-                                  padding: "0.15rem 0",
-                                }}
-                              >
+                              <div key={l.id} className="modal-caja-linea">
                                 <span>
                                   {l.producto?.nombre} × {l.cantidad}
                                 </span>
@@ -989,50 +613,20 @@ function CierreCaja() {
 
                 {rol !== "FLORISTA" && pedidosCancelados.length > 0 && (
                   <div>
-                    <h3
-                      style={{
-                        color: "#c0392b",
-                        fontSize: "0.9rem",
-                        marginBottom: "1rem",
-                        textTransform: "uppercase",
-                        letterSpacing: "0.08em",
-                      }}
-                    >
+                    <h3 className="modal-caja-seccion-title-rojo">
                       Pedidos cancelados ({pedidosCancelados.length})
                     </h3>
                     {pedidosCancelados.map((p) => (
-                      <div
-                        key={p.id}
-                        style={{
-                          border: "1px solid #f5e8e8",
-                          borderRadius: "8px",
-                          padding: "0.75rem 1rem",
-                          marginBottom: "0.75rem",
-                          background: "#fdf8f8",
-                        }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <span
-                            style={{ fontSize: "0.85rem", color: "#7a6a5a" }}
-                          >
+                      <div key={p.id} className="modal-caja-cancelado">
+                        <div className="modal-caja-cancelado-row">
+                          <span className="modal-caja-cancelado-info">
                             {p.mesa ? `Mesa ${p.mesa.numero}` : "Mostrador"} ·{" "}
                             {new Date(p.fecha).toLocaleTimeString("es-ES", {
                               hour: "2-digit",
                               minute: "2-digit",
                             })}
                           </span>
-                          <span
-                            style={{
-                              fontSize: "0.8rem",
-                              color: "#c0392b",
-                              fontStyle: "italic",
-                            }}
-                          >
+                          <span className="modal-caja-cancelado-motivo">
                             {p.motivoCancelacion || "Sin motivo"}
                           </span>
                         </div>
@@ -1042,13 +636,7 @@ function CierreCaja() {
                 )}
 
                 {pedidosDia.length === 0 && (
-                  <p
-                    style={{
-                      color: "#b0a090",
-                      textAlign: "center",
-                      fontStyle: "italic",
-                    }}
-                  >
+                  <p className="modal-caja-vacio">
                     No se encontraron pedidos para este día
                   </p>
                 )}

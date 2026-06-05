@@ -1,15 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
-import "./App.css";
 import { CarritoProvider } from "./context/CarritoContext";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Salon from "./pages/Salon";
-import TPV from "./pages/TPV";
-import Carta from "./pages/Carta";
 import Productos from "./pages/Productos";
-import Clientes from "./pages/Clientes";
 import Eventos from "./pages/Eventos";
 import Reservas from "./pages/Reservas";
 import Appcc from "./pages/Appcc";
@@ -75,9 +71,6 @@ function App() {
           <Route path="/appcc" element={<Appcc />} />
           <Route path="/cierre-caja" element={<CierreCaja />} />
           <Route path="/empleados" element={soloAdmin(<Empleados />)} />
-          <Route path="/carta" element={cajeroOAdmin(<Carta />)} />
-          <Route path="/tpv" element={cajeroOAdmin(<TPV />)} />
-          <Route path="/clientes" element={cajeroOAdmin(<Clientes />)} />
           <Route path="/reservas" element={floristaOAdmin(<Reservas />)} />
         </Routes>
       </CarritoProvider>
