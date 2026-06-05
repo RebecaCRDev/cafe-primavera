@@ -28,6 +28,12 @@ public class Producto {
     @JoinColumn(name = "categoria_id", nullable = false)
     private Categoria categoria;
 
+    @OneToOne(mappedBy = "producto", fetch = FetchType.EAGER)
+    private ProductoFlor productoFlor;
+
+    public ProductoFlor getProductoFlor() { return productoFlor; }
+    public void setProductoFlor(ProductoFlor productoFlor) { this.productoFlor = productoFlor; }
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
     public String getNombre() { return nombre; }

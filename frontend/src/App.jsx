@@ -73,12 +73,12 @@ function App() {
           <Route path="/productos" element={<Productos />} />
           <Route path="/eventos" element={floristaOAdmin(<Eventos />)} />
           <Route path="/appcc" element={<Appcc />} />
-          <Route path="/cierre-caja" element={<CierreCaja />} />
+          <Route path="/cierre-caja" element={cajeroOAdmin(<CierreCaja />)} />
           <Route path="/empleados" element={soloAdmin(<Empleados />)} />
-          <Route path="/carta" element={<Carta />} />
+          <Route path="/carta" element={cajeroOAdmin(<Carta />)} />
           <Route path="/tpv" element={cajeroOAdmin(<TPV />)} />
-          <Route path="/clientes" element={<Clientes />} />
-          <Route path="/reservas" element={<Reservas />} />
+          <Route path="/clientes" element={cajeroOAdmin(<Clientes />)} />
+          <Route path="/reservas" element={floristaOAdmin(<Reservas />)} />
         </Routes>
       </CarritoProvider>
     </BrowserRouter>

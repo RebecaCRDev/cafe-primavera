@@ -36,6 +36,11 @@ public class ReservaService {
         Evento evento = eventoRepository.findById(reserva.getEvento().getId())
             .orElseThrow(() -> new RuntimeException("Evento no encontrado"));
 
+            
+        if (evento.getFechaHora() != null && evento.getFechaHora().isBefore(java.time.LocalDateTime.now())) {
+            throw new RuntimeException("No se puede reservar un taller que ya ha tenido lugar");
+        }
+
         int numPersonas = reserva.getNumPersonas() != null ? reserva.getNumPersonas() : 1;
 
         // Idempotencia: evitar reserva duplicada del mismo cliente para el mismo evento

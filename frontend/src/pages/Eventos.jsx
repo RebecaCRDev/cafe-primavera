@@ -179,6 +179,9 @@ function Eventos() {
 
   const TarjetaTaller = ({ e, mostrarEditar = true }) => {
     const reservasEvento = reservasDeEvento(e.id);
+    const hoy = new Date();
+    const fechaTaller = new Date(e.fechaHora);
+    const esPassado = fechaTaller < hoy;
     return (
       <div className="card" style={{ borderLeft: "4px solid #6b7c4a" }}>
         <h2 style={{ marginBottom: "0.5rem", color: "#3a3028" }}>{e.nombre}</h2>
@@ -239,6 +242,11 @@ function Eventos() {
           }}
         >
           <span className="badge badge-green">{e.tipo}</span>
+          {esPassado && (
+            <span className="badge badge-red" style={{ marginLeft: "0.5rem" }}>
+              REALIZADO
+            </span>
+          )}
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             <button
               onClick={() => setModalReservas(e)}
@@ -279,7 +287,7 @@ function Eventos() {
               }}
               className="btn-primary"
               style={{ padding: "0.3rem 0.8rem", fontSize: "0.8rem" }}
-              disabled={e.plazasDisponibles === 0}
+              disabled={e.plazasDisponibles === 0 || esPassado}
             >
               + Reservar
             </button>

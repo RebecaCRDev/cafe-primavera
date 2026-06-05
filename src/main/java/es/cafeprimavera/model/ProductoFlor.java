@@ -1,5 +1,6 @@
 package es.cafeprimavera.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
@@ -24,8 +25,11 @@ public class ProductoFlor {
 
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
+
+    @JsonIgnore
     public Producto getProducto() { return producto; }
     public void setProducto(Producto producto) { this.producto = producto; }
+
     public LocalDate getFechaCaducidad() { return fechaCaducidad; }
     public void setFechaCaducidad(LocalDate fechaCaducidad) { this.fechaCaducidad = fechaCaducidad; }
     public String getTemporada() { return temporada; }

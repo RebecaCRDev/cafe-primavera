@@ -3,7 +3,9 @@ package es.cafeprimavera.service;
 import es.cafeprimavera.model.Empleado;
 import es.cafeprimavera.model.MovimientoStock;
 import es.cafeprimavera.model.Producto;
+import es.cafeprimavera.model.ProductoFlor;
 import es.cafeprimavera.repository.MovimientoStockRepository;
+import es.cafeprimavera.repository.ProductoFlorRepository;
 import es.cafeprimavera.repository.ProductoRepository;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -14,11 +16,14 @@ public class ProductoService {
 
     private final ProductoRepository productoRepository;
     private final MovimientoStockRepository movimientoStockRepository;
+    private final ProductoFlorRepository productoFlorRepository;
 
     public ProductoService(ProductoRepository productoRepository,
-                           MovimientoStockRepository movimientoStockRepository) {
+                           MovimientoStockRepository movimientoStockRepository,
+                           ProductoFlorRepository productoFlorRepository) {
         this.productoRepository = productoRepository;
         this.movimientoStockRepository = movimientoStockRepository;
+        this.productoFlorRepository = productoFlorRepository;
     }
 
     public List<Producto> findAll() {
@@ -38,7 +43,27 @@ public class ProductoService {
     }
 
     public Producto save(Producto producto) {
-        return productoRepository.save(producto);
+        ProductoFlor florData = producto.getProductoFlor();
+        producto.setProductoFlor(null);
+        Producto guardado = productoRepository.save(producto);
+
+        if (florData != null) {
+            // Buscar si ya existe un productoFlor para este producto
+            ProductoFlor flor = productoFlorRepository
+                .findByProducto_Id(guardado.getId())
+                .orElse(new ProductoFlor());
+            flor.setProducto(guardado);
+            if (florData.getFechaCaducidad() != null)
+                flor.setFechaCaducidad(florData.getFechaCaducidad());
+            if (florData.getTemporada() != null)
+                flor.setTemporada(florData.getTemporada());
+            if (florData.getColor() != null)
+                flor.setColor(florData.getColor());
+            ProductoFlor florGuardado = productoFlorRepository.save(flor);
+            guardado.setProductoFlor(florGuardado);
+        }
+
+        return guardado;
     }
 
     public void deleteById(Integer id) {
@@ -60,17 +85,10 @@ public class ProductoService {
         int nuevoStock;
 
         switch (tipo) {
-            case "COMPRA":
-                nuevoStock = stockAnterior + cantidad;
-                break;
-            case "AJUSTE":
-                nuevoStock = cantidad;
-                break;
-            case "BAJA":
-                nuevoStock = Math.max(0, stockAnterior - cantidad);
-                break;
-            default:
-                throw new RuntimeException("Tipo de movimiento no válido");
+            case "COMPRA": nuevoStock = stockAnterior + cantidad; break;
+            case "AJUSTE": nuevoStock = cantidad; break;
+            case "BAJA": nuevoStock = Math.max(0, stockAnterior - cantidad); break;
+            default: throw new RuntimeException("Tipo de movimiento no válido");
         }
 
         producto.setStock(nuevoStock);

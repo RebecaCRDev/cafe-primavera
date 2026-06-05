@@ -3,6 +3,24 @@ import api from "../services/api";
 
 const PRODUCTOS_POR_PAGINA = 10;
 
+const hoy = new Date();
+hoy.setHours(0, 0, 0, 0);
+
+const diasHastaCaducidad = (fecha) => {
+  if (!fecha) return null;
+  const f = new Date(fecha);
+  f.setHours(0, 0, 0, 0);
+  return Math.floor((f - hoy) / (1000 * 60 * 60 * 24));
+};
+
+const estadoCaducidad = (fecha) => {
+  const dias = diasHastaCaducidad(fecha);
+  if (dias === null) return null;
+  if (dias < 0) return "caducado";
+  if (dias <= 7) return "proximo";
+  return "ok";
+};
+
 function Productos() {
   const [productos, setProductos] = useState([]);
   const [categorias, setCategorias] = useState([]);
@@ -11,6 +29,9 @@ function Productos() {
   const [precio, setPrecio] = useState("");
   const [stock, setStock] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
+  const [fechaCaducidad, setFechaCaducidad] = useState("");
+  const [temporada, setTemporada] = useState("TODO_AÑO");
+  const [color, setColor] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [modalGestion, setModalGestion] = useState(null);
   const [tipoMovimiento, setTipoMovimiento] = useState("COMPRA");
@@ -19,6 +40,7 @@ function Productos() {
   const [pagina, setPagina] = useState(1);
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
+  const esFlorista = usuario?.rol === "FLORISTA" || usuario?.rol === "ADMIN";
 
   useEffect(() => {
     api.get("/productos").then((res) => setProductos(res.data));
@@ -61,23 +83,51 @@ function Productos() {
 
   const stockCritico = productosPorRol.filter((p) => p.activo && p.stock < 10);
 
+  const floresCaducidad = esFlorista
+    ? productosPorRol.filter((p) => {
+        const estado = estadoCaducidad(p.productoFlor?.fechaCaducidad);
+        return estado === "caducado" || estado === "proximo";
+      })
+    : [];
+
+  const categoriaSeleccionada = categorias.find(
+    (c) => c.id === parseInt(categoriaId),
+  );
+  const esFlor =
+    categoriaSeleccionada?.tipo === "FLORISTERIA" ||
+    categoriaSeleccionada?.tipo === "PACK";
+
   const crearProducto = () => {
     if (!nombre || !precio || !categoriaId)
       return setMensaje("Nombre, precio y categoría son obligatorios");
+
+    const body = {
+      nombre,
+      precio: parseFloat(precio),
+      stock: parseInt(stock) || 0,
+      activo: true,
+      categoria: { id: parseInt(categoriaId) },
+    };
+
+    if (esFlor && fechaCaducidad) {
+      body.productoFlor = {
+        fechaCaducidad,
+        temporada: temporada || "TODO_AÑO",
+        color: color || "",
+      };
+    }
+
     api
-      .post("/productos", {
-        nombre,
-        precio: parseFloat(precio),
-        stock: parseInt(stock) || 0,
-        activo: true,
-        categoria: { id: parseInt(categoriaId) },
-      })
+      .post("/productos", body)
       .then((res) => {
         setProductos([...productos, res.data]);
         setNombre("");
         setPrecio("");
         setStock("");
         setCategoriaId("");
+        setFechaCaducidad("");
+        setTemporada("TODO_AÑO");
+        setColor("");
         setMensaje("Producto creado correctamente");
       })
       .catch(() => setMensaje("Error al crear el producto"));
@@ -123,6 +173,12 @@ function Productos() {
 
   const nuevoStock = calcularNuevoStock();
 
+  const formatFecha = (fecha) => {
+    if (!fecha) return "—";
+    const [y, m, d] = fecha.split("-");
+    return `${d}/${m}/${y}`;
+  };
+
   return (
     <div className="page">
       <h1>Inventario</h1>
@@ -135,7 +191,7 @@ function Productos() {
             border: "1px solid #e67e22",
             borderRadius: "10px",
             padding: "1rem 1.5rem",
-            marginBottom: "2rem",
+            marginBottom: "1rem",
             display: "flex",
             alignItems: "flex-start",
             gap: "1rem",
@@ -157,6 +213,52 @@ function Productos() {
             <p style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
               {stockCritico
                 .map((p) => `${p.nombre} (${p.stock} ud.)`)
+                .join(" · ")}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Alerta flores caducidad */}
+      {esFlorista && floresCaducidad.length > 0 && (
+        <div
+          style={{
+            background: "#fdecea",
+            border: "1px solid #c0392b",
+            borderRadius: "10px",
+            padding: "1rem 1.5rem",
+            marginBottom: "2rem",
+            display: "flex",
+            alignItems: "flex-start",
+            gap: "1rem",
+          }}
+        >
+          <span style={{ fontSize: "1.3rem" }}>🌸</span>
+          <div>
+            <p
+              style={{
+                color: "#c0392b",
+                fontWeight: "bold",
+                fontSize: "0.9rem",
+                marginBottom: "0.4rem",
+              }}
+            >
+              {floresCaducidad.length} producto
+              {floresCaducidad.length > 1 ? "s" : ""} con caducidad próxima o
+              vencida
+            </p>
+            <p style={{ color: "#7a6a5a", fontSize: "0.85rem" }}>
+              {floresCaducidad
+                .map((p) => {
+                  const dias = diasHastaCaducidad(
+                    p.productoFlor?.fechaCaducidad,
+                  );
+                  const texto =
+                    dias < 0
+                      ? "caducado"
+                      : `caduca en ${dias} día${dias === 1 ? "" : "s"}`;
+                  return `${p.nombre} (${texto})`;
+                })
                 .join(" · ")}
             </p>
           </div>
@@ -203,6 +305,37 @@ function Productos() {
             Añadir
           </button>
         </div>
+
+        {/* Campos extra para floristería */}
+        {esFlor && (
+          <div className="form-row" style={{ marginTop: "0.75rem" }}>
+            <input
+              type="date"
+              value={fechaCaducidad}
+              onChange={(e) => setFechaCaducidad(e.target.value)}
+              style={{ flex: 1 }}
+              title="Fecha de caducidad"
+            />
+            <select
+              value={temporada}
+              onChange={(e) => setTemporada(e.target.value)}
+              style={{ flex: 1 }}
+            >
+              <option value="TODO_AÑO">Todo el año</option>
+              <option value="PRIMAVERA">Primavera</option>
+              <option value="VERANO">Verano</option>
+              <option value="OTOÑO">Otoño</option>
+              <option value="INVIERNO">Invierno</option>
+            </select>
+            <input
+              placeholder="Color"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              style={{ flex: 1 }}
+            />
+          </div>
+        )}
+
         {mensaje && (
           <p
             style={{
@@ -247,57 +380,96 @@ function Productos() {
             <th>Categoría</th>
             <th>Precio</th>
             <th>Stock</th>
+            {esFlorista && <th>Caduca</th>}
             <th>Estado</th>
             <th>Acción</th>
           </tr>
         </thead>
         <tbody>
-          {productosPagina.map((p) => (
-            <tr key={p.id}>
-              <td>{p.nombre}</td>
-              <td style={{ color: "#7a6a5a" }}>{p.categoria?.nombre}</td>
-              <td style={{ color: "#6b7c4a" }}>{p.precio}€</td>
-              <td>
-                <span
-                  style={{
-                    color: p.stock < 10 ? "#c0392b" : "#3a3028",
-                    fontWeight: p.stock < 10 ? "bold" : "normal",
-                  }}
-                >
-                  {p.stock} {p.stock < 10 && "⚠️"}
-                </span>
-              </td>
-              <td>
-                <span
-                  className={p.activo ? "badge badge-green" : "badge badge-red"}
-                >
-                  {p.activo ? "Activo" : "Inactivo"}
-                </span>
-              </td>
-              <td>
-                <button
-                  onClick={() => {
-                    setModalGestion(p);
-                    setCantidad("");
-                    setMotivo("");
-                    setTipoMovimiento("COMPRA");
-                  }}
-                  style={{
-                    background: "#e8f0e0",
-                    color: "#4a6030",
-                    border: "1px solid #6b7c4a",
-                    borderRadius: "6px",
-                    padding: "0.3rem 0.8rem",
-                    cursor: "pointer",
-                    fontSize: "0.8rem",
-                    fontFamily: "Georgia, serif",
-                  }}
-                >
-                  Gestionar stock
-                </button>
-              </td>
-            </tr>
-          ))}
+          {productosPagina.map((p) => {
+            const estado = estadoCaducidad(p.productoFlor?.fechaCaducidad);
+            const filaBackground =
+              estado === "caducado"
+                ? "#fdecea"
+                : estado === "proximo"
+                  ? "#fef5e7"
+                  : "transparent";
+
+            return (
+              <tr key={p.id} style={{ background: filaBackground }}>
+                <td>{p.nombre}</td>
+                <td style={{ color: "#7a6a5a" }}>{p.categoria?.nombre}</td>
+                <td style={{ color: "#6b7c4a" }}>{p.precio}€</td>
+                <td>
+                  <span
+                    style={{
+                      color: p.stock < 10 ? "#c0392b" : "#3a3028",
+                      fontWeight: p.stock < 10 ? "bold" : "normal",
+                    }}
+                  >
+                    {p.stock} {p.stock < 10 && "⚠️"}
+                  </span>
+                </td>
+                {esFlorista && (
+                  <td>
+                    {p.productoFlor?.fechaCaducidad ? (
+                      <span
+                        style={{
+                          color:
+                            estado === "caducado"
+                              ? "#c0392b"
+                              : estado === "proximo"
+                                ? "#e67e22"
+                                : "#3a3028",
+                          fontWeight: estado !== "ok" ? "bold" : "normal",
+                          fontSize: "0.85rem",
+                        }}
+                      >
+                        {formatFecha(p.productoFlor.fechaCaducidad)}
+                        {estado === "caducado" && " ⛔"}
+                        {estado === "proximo" && " ⚠️"}
+                      </span>
+                    ) : (
+                      <span style={{ color: "#c8b89a", fontSize: "0.85rem" }}>
+                        —
+                      </span>
+                    )}
+                  </td>
+                )}
+                <td>
+                  <span
+                    className={
+                      p.activo ? "badge badge-green" : "badge badge-red"
+                    }
+                  >
+                    {p.activo ? "Activo" : "Inactivo"}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    onClick={() => {
+                      setModalGestion(p);
+                      setCantidad("");
+                      setMotivo("");
+                      setTipoMovimiento("COMPRA");
+                    }}
+                    style={{
+                      background: "#e8f0e0",
+                      color: "#4a6030",
+                      border: "1px solid #6b7c4a",
+                      borderRadius: "6px",
+                      padding: "0.3rem 0.8rem",
+                      cursor: "pointer",
+                      fontSize: "0.8rem",
+                      fontFamily: "Georgia, serif",
+                    }}
+                  >
+                    Gestionar stock
+                  </button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
@@ -468,6 +640,22 @@ function Productos() {
               >
                 {modalGestion.stock} unidades
               </span>
+              {modalGestion.productoFlor?.fechaCaducidad && (
+                <span
+                  style={{
+                    marginLeft: "1rem",
+                    color:
+                      estadoCaducidad(
+                        modalGestion.productoFlor.fechaCaducidad,
+                      ) === "caducado"
+                        ? "#c0392b"
+                        : "#e67e22",
+                  }}
+                >
+                  · Caduca:{" "}
+                  {formatFecha(modalGestion.productoFlor.fechaCaducidad)}
+                </span>
+              )}
             </p>
             <div
               style={{ display: "flex", gap: "0.5rem", marginBottom: "1.2rem" }}
