@@ -43,4 +43,15 @@ public class ReservaController {
     public ResponseEntity<Reserva> cancelar(@PathVariable Integer id) {
         return ResponseEntity.ok(reservaService.cancelar(id));
     }
+
+    @PatchMapping("/{id}/confirmar")
+    public ResponseEntity<Reserva> confirmar(@PathVariable Integer id) {
+        return ResponseEntity.ok(reservaService.confirmar(id));
+    }
+
+    @PatchMapping("/{id}/personas")
+    public ResponseEntity<Reserva> editarPersonas(@PathVariable Integer id,
+                                                @RequestParam Integer numPersonas) {
+        return ResponseEntity.ok(reservaService.editarPersonas(id, numPersonas));
+    }
 }

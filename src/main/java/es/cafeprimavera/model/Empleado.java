@@ -1,7 +1,7 @@
 package es.cafeprimavera.model;
 
 import jakarta.persistence.*;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "empleado")
@@ -17,7 +17,7 @@ public class Empleado {
     @Column(nullable = false, unique = true, length = 200)
     private String email;
 
-    @JsonIgnore
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(nullable = false)
     private String passwordHash;
 

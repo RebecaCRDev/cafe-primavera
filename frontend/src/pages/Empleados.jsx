@@ -6,6 +6,7 @@ function Empleados() {
   const [nombre, setNombre] = useState("");
   const [email, setEmail] = useState("");
   const [rol, setRol] = useState("CAJERO");
+  const [password, setPassword] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [modalEditar, setModalEditar] = useState(null);
   const [editNombre, setEditNombre] = useState("");
@@ -18,13 +19,14 @@ function Empleados() {
   }, []);
 
   const crearEmpleado = () => {
-    if (!nombre || !email) return setMensaje("Nombre y email son obligatorios");
+    if (!nombre || !email || !password)
+      return setMensaje("Nombre, email y contraseña son obligatorios");
     api
       .post("/empleados", {
         nombre,
         email,
         rol,
-        passwordHash: "$2a$10$hashEjemplo",
+        passwordHash: password,
         activo: true,
       })
       .then((res) => {
@@ -32,6 +34,7 @@ function Empleados() {
         setNombre("");
         setEmail("");
         setRol("CAJERO");
+        setPassword("");
         setMensaje("Empleado creado correctamente");
       })
       .catch(() => setMensaje("Error al crear el empleado"));
@@ -85,6 +88,22 @@ function Empleados() {
       .catch(() => setMensaje("Error al actualizar el empleado"));
   };
 
+  const eliminarEmpleado = (empleado) => {
+    if (
+      !window.confirm(
+        `¿Eliminar a ${empleado.nombre}? Esta acción no se puede deshacer.`,
+      )
+    )
+      return;
+    api
+      .delete(`/empleados/${empleado.id}`)
+      .then(() => {
+        setEmpleados(empleados.filter((e) => e.id !== empleado.id));
+        setMensaje("Empleado eliminado correctamente");
+      })
+      .catch(() => setMensaje("Error al eliminar el empleado"));
+  };
+
   const rolColor = (rol) => {
     if (rol === "ADMIN") return "badge-red";
     if (rol === "FLORISTA") return "badge-green";
@@ -108,6 +127,13 @@ function Empleados() {
             placeholder="Email *"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
+            style={{ flex: 2 }}
+          />
+          <input
+            type="password"
+            placeholder="Contraseña *"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             style={{ flex: 2 }}
           />
           <select
@@ -164,6 +190,13 @@ function Empleados() {
                     style={{ fontSize: "0.8rem", padding: "0.3rem 0.8rem" }}
                   >
                     {e.activo ? "Desactivar" : "Activar"}
+                  </button>
+                  <button
+                    className="btn-danger"
+                    onClick={() => eliminarEmpleado(e)}
+                    style={{ fontSize: "0.8rem", padding: "0.3rem 0.8rem" }}
+                  >
+                    🗑️ Eliminar
                   </button>
                 </div>
               </td>

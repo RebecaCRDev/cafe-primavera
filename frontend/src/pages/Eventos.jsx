@@ -8,8 +8,12 @@ function Eventos() {
   const [eventoSeleccionado, setEventoSeleccionado] = useState(null);
   const [modalReservas, setModalReservas] = useState(null);
   const [modalEditar, setModalEditar] = useState(null);
+  const [modalEditarPersonas, setModalEditarPersonas] = useState(null);
+  const [nuevasPersonas, setNuevasPersonas] = useState("1");
   const [nombreCliente, setNombreCliente] = useState("");
   const [numPersonas, setNumPersonas] = useState("1");
+  const [telefonoCliente, setTelefonoCliente] = useState("");
+  const [emailCliente, setEmailCliente] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [vistaActiva, setVistaActiva] = useState("talleres");
   const [nuevoNombre, setNuevoNombre] = useState("");
@@ -25,6 +29,9 @@ function Eventos() {
   const [editPlazas, setEditPlazas] = useState("");
   const [editPrecio, setEditPrecio] = useState("");
   const [editTipo, setEditTipo] = useState("");
+  const [busqueda, setBusqueda] = useState("");
+  const [paginaActual, setPaginaActual] = useState(1);
+  const reservasPorPagina = 8;
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -33,6 +40,12 @@ function Eventos() {
     api.get("/reservas").then((res) => setReservas(res.data));
     api.get("/clientes").then((res) => setClientes(res.data));
   }, []);
+
+  const recargarTodo = () => {
+    api.get("/eventos").then((r) => setEventos(r.data));
+    api.get("/reservas").then((r) => setReservas(r.data));
+    api.get("/clientes").then((r) => setClientes(r.data));
+  };
 
   const crearTaller = () => {
     if (!nuevoNombre || !nuevoFecha || !nuevoPlazas || !nuevoPrecio)
@@ -60,6 +73,22 @@ function Eventos() {
         setMensaje("Taller creado correctamente");
       })
       .catch(() => setMensaje("Error al crear el taller"));
+  };
+
+  const eliminarTaller = (evento) => {
+    if (
+      !window.confirm(
+        `¿Eliminar el taller "${evento.nombre}"? Esta acción no se puede deshacer.`,
+      )
+    )
+      return;
+    api
+      .delete(`/eventos/${evento.id}`)
+      .then(() => {
+        setEventos(eventos.filter((e) => e.id !== evento.id));
+        setMensaje("Taller eliminado correctamente");
+      })
+      .catch(() => setMensaje("Error al eliminar el taller"));
   };
 
   const abrirEditar = (evento) => {
@@ -123,14 +152,14 @@ function Eventos() {
           evento: { id: eventoSeleccionado.id },
           numPersonas: personas,
         })
-        .then((res) => {
-          setReservas([...reservas, res.data]);
+        .then(() => {
           setNombreCliente("");
           setNumPersonas("1");
+          setTelefonoCliente("");
+          setEmailCliente("");
           setEventoSeleccionado(null);
           setMensaje("Reserva creada correctamente");
-          api.get("/eventos").then((r) => setEventos(r.data));
-          api.get("/reservas").then((r) => setReservas(r.data));
+          recargarTodo();
         })
         .catch(() =>
           setMensaje(
@@ -143,7 +172,11 @@ function Eventos() {
       hacerReserva(clienteExistente.id);
     } else {
       api
-        .post("/clientes", { nombre: nombreCliente })
+        .post("/clientes", {
+          nombre: nombreCliente,
+          telefono: telefonoCliente || null,
+          email: emailCliente || null,
+        })
         .then((res) => hacerReserva(res.data.id))
         .catch(() => setMensaje("Error al crear el cliente"));
     }
@@ -152,12 +185,40 @@ function Eventos() {
   const cancelarReserva = (id) => {
     api
       .patch(`/reservas/${id}/cancelar`)
-      .then((res) => {
-        setReservas(reservas.map((r) => (r.id === id ? res.data : r)));
-        api.get("/eventos").then((r) => setEventos(r.data));
-        api.get("/reservas").then((r) => setReservas(r.data));
+      .then(() => {
+        recargarTodo();
+        setMensaje("Reserva cancelada");
       })
       .catch(() => setMensaje("Error al cancelar"));
+  };
+
+  const confirmarReserva = (id) => {
+    api
+      .patch(`/reservas/${id}/confirmar`)
+      .then(() => {
+        recargarTodo();
+        setMensaje("Reserva confirmada");
+      })
+      .catch(() => setMensaje("Error al confirmar"));
+  };
+
+  const abrirEditarPersonas = (reserva) => {
+    setModalEditarPersonas(reserva);
+    setNuevasPersonas(String(reserva.numPersonas || 1));
+    setMensaje("");
+  };
+
+  const guardarPersonas = () => {
+    const num = parseInt(nuevasPersonas);
+    if (!num || num < 1) return setMensaje("Número de personas inválido");
+    api
+      .patch(`/reservas/${modalEditarPersonas.id}/personas?numPersonas=${num}`)
+      .then(() => {
+        setModalEditarPersonas(null);
+        recargarTodo();
+        setMensaje("Reserva actualizada");
+      })
+      .catch(() => setMensaje("No hay suficientes plazas disponibles"));
   };
 
   const semanaActual = () => {
@@ -177,11 +238,28 @@ function Eventos() {
     return fecha >= lunes && fecha <= domingo;
   });
 
+  const reservasFiltradas = reservas.filter((r) => {
+    const texto = busqueda.toLowerCase();
+    return (
+      r.cliente?.nombre?.toLowerCase().includes(texto) ||
+      r.evento?.nombre?.toLowerCase().includes(texto) ||
+      r.cliente?.email?.toLowerCase().includes(texto) ||
+      r.cliente?.telefono?.includes(texto)
+    );
+  });
+
+  const totalPaginas = Math.ceil(reservasFiltradas.length / reservasPorPagina);
+  const reservasPaginadas = reservasFiltradas.slice(
+    (paginaActual - 1) * reservasPorPagina,
+    paginaActual * reservasPorPagina,
+  );
+
   const TarjetaTaller = ({ e, mostrarEditar = true }) => {
     const reservasEvento = reservasDeEvento(e.id);
     const hoy = new Date();
     const fechaTaller = new Date(e.fechaHora);
     const esPassado = fechaTaller < hoy;
+    const estaCompleto = e.plazasDisponibles === 0;
 
     return (
       <div className="card tarjeta-taller">
@@ -197,7 +275,7 @@ function Eventos() {
           <span className="tarjeta-taller-label">Plazas</span>
           <span
             style={{
-              color: e.plazasDisponibles === 0 ? "#c0392b" : "#6b7c4a",
+              color: estaCompleto ? "#c0392b" : "#6b7c4a",
               fontSize: "0.85rem",
               fontWeight: "bold",
             }}
@@ -210,9 +288,19 @@ function Eventos() {
           <span className="tarjeta-taller-valor">{e.precio}€</span>
         </div>
         <div className="tarjeta-taller-footer">
-          <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
             <span className="badge badge-green">{e.tipo}</span>
             {esPassado && <span className="badge badge-red">REALIZADO</span>}
+            {estaCompleto && !esPassado && (
+              <span className="badge badge-red">COMPLETO</span>
+            )}
           </div>
           <div className="tarjeta-taller-acciones">
             <button
@@ -222,9 +310,18 @@ function Eventos() {
               Ver reservas ({reservasEvento.length})
             </button>
             {mostrarEditar && (
-              <button className="btn-editar" onClick={() => abrirEditar(e)}>
-                ✏️ Editar
-              </button>
+              <>
+                <button className="btn-editar" onClick={() => abrirEditar(e)}>
+                  ✏️ Editar
+                </button>
+                <button
+                  className="btn-danger"
+                  onClick={() => eliminarTaller(e)}
+                  style={{ fontSize: "0.8rem", padding: "0.3rem 0.8rem" }}
+                >
+                  🗑️ Eliminar
+                </button>
+              </>
             )}
             <button
               className="btn-primary"
@@ -233,7 +330,7 @@ function Eventos() {
                 setEventoSeleccionado(e);
                 setMensaje("");
               }}
-              disabled={e.plazasDisponibles === 0 || esPassado}
+              disabled={estaCompleto || esPassado}
             >
               + Reservar
             </button>
@@ -370,50 +467,141 @@ function Eventos() {
       )}
 
       {vistaActiva === "reservas" && (
-        <table>
-          <thead>
-            <tr>
-              <th>Cliente</th>
-              <th>Taller</th>
-              <th>Personas</th>
-              <th>Fecha reserva</th>
-              <th>Estado</th>
-              <th>Acción</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservas.map((r) => (
-              <tr key={r.id}>
-                <td>{r.cliente?.nombre || "—"}</td>
-                <td className="td-secundario">{r.evento?.nombre}</td>
-                <td className="td-secundario">{r.numPersonas || 1}</td>
-                <td className="td-secundario">
-                  {new Date(r.fechaReserva).toLocaleString("es-ES")}
-                </td>
-                <td>
-                  <span
-                    className={`badge ${r.estado === "CANCELADA" ? "badge-red" : r.estado === "CONFIRMADA" ? "badge-green" : "badge-gray"}`}
-                  >
-                    {r.estado}
-                  </span>
-                </td>
-                <td>
-                  {r.estado !== "CANCELADA" && (
-                    <button
-                      className="btn-danger"
-                      onClick={() => cancelarReserva(r.id)}
-                    >
-                      Cancelar
-                    </button>
-                  )}
-                </td>
+        <>
+          <div style={{ marginBottom: "1rem" }}>
+            <input
+              placeholder="Buscar por cliente, taller, email o teléfono..."
+              value={busqueda}
+              onChange={(e) => {
+                setBusqueda(e.target.value);
+                setPaginaActual(1);
+              }}
+              style={{
+                width: "100%",
+                padding: "0.6rem 1rem",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+                fontSize: "0.95rem",
+              }}
+            />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Teléfono</th>
+                <th>Email</th>
+                <th>Taller</th>
+                <th>Personas</th>
+                <th>Fecha reserva</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {reservasPaginadas.map((r) => (
+                <tr key={r.id}>
+                  <td>{r.cliente?.nombre || "—"}</td>
+                  <td className="td-secundario">
+                    {r.cliente?.telefono || "—"}
+                  </td>
+                  <td className="td-secundario">{r.cliente?.email || "—"}</td>
+                  <td className="td-secundario">{r.evento?.nombre}</td>
+                  <td className="td-secundario">{r.numPersonas || 1}</td>
+                  <td className="td-secundario">
+                    {new Date(r.fechaReserva).toLocaleString("es-ES")}
+                  </td>
+                  <td>
+                    <span
+                      className={`badge ${r.estado === "CANCELADA" ? "badge-red" : r.estado === "CONFIRMADA" ? "badge-green" : "badge-gray"}`}
+                    >
+                      {r.estado}
+                    </span>
+                  </td>
+                  <td>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "0.3rem",
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      {r.estado !== "CANCELADA" && (
+                        <>
+                          {r.estado !== "CONFIRMADA" && (
+                            <button
+                              className="btn-primary"
+                              onClick={() => confirmarReserva(r.id)}
+                              style={{
+                                fontSize: "0.75rem",
+                                padding: "0.25rem 0.6rem",
+                              }}
+                            >
+                              ✓ Confirmar
+                            </button>
+                          )}
+                          <button
+                            className="btn-editar"
+                            onClick={() => abrirEditarPersonas(r)}
+                            style={{
+                              fontSize: "0.75rem",
+                              padding: "0.25rem 0.6rem",
+                            }}
+                          >
+                            ✏️ Personas
+                          </button>
+                          <button
+                            className="btn-danger"
+                            onClick={() => cancelarReserva(r.id)}
+                            style={{
+                              fontSize: "0.75rem",
+                              padding: "0.25rem 0.6rem",
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {totalPaginas > 1 && (
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "0.5rem",
+                marginTop: "1rem",
+              }}
+            >
+              <button
+                className="btn-cancelar"
+                onClick={() => setPaginaActual((p) => Math.max(p - 1, 1))}
+                disabled={paginaActual === 1}
+              >
+                ← Anterior
+              </button>
+              <span style={{ padding: "0.4rem 0.8rem", fontSize: "0.9rem" }}>
+                {paginaActual} / {totalPaginas}
+              </span>
+              <button
+                className="btn-cancelar"
+                onClick={() =>
+                  setPaginaActual((p) => Math.min(p + 1, totalPaginas))
+                }
+                disabled={paginaActual === totalPaginas}
+              >
+                Siguiente →
+              </button>
+            </div>
+          )}
+        </>
       )}
 
-      {/* Modal nueva reserva */}
       {eventoSeleccionado && (
         <div
           className="modal-overlay"
@@ -447,6 +635,27 @@ function Eventos() {
                 style={{ flex: 1, fontSize: "0.95rem" }}
               />
             </div>
+            <div
+              className="modal-taller-inputs"
+              style={{ marginTop: "0.5rem", flexDirection: "column" }}
+            >
+              <input
+                placeholder="Teléfono"
+                value={telefonoCliente}
+                onChange={(e) => setTelefonoCliente(e.target.value)}
+                style={{ fontSize: "0.95rem", width: "100%" }}
+              />
+              <input
+                placeholder="Email"
+                value={emailCliente}
+                onChange={(e) => setEmailCliente(e.target.value)}
+                style={{
+                  fontSize: "0.95rem",
+                  width: "100%",
+                  marginTop: "0.5rem",
+                }}
+              />
+            </div>
             {mensaje && <p className="mensaje-error">{mensaje}</p>}
             <div className="modal-taller-acciones">
               <button
@@ -470,7 +679,6 @@ function Eventos() {
         </div>
       )}
 
-      {/* Modal ver reservas */}
       {modalReservas && (
         <div className="modal-overlay" onClick={() => setModalReservas(null)}>
           <div className="modal-reservas" onClick={(e) => e.stopPropagation()}>
@@ -488,6 +696,8 @@ function Eventos() {
                 <thead>
                   <tr>
                     <th>Cliente</th>
+                    <th>Teléfono</th>
+                    <th>Email</th>
                     <th>Personas</th>
                     <th>Estado</th>
                     <th>Acción</th>
@@ -497,6 +707,12 @@ function Eventos() {
                   {reservasDeEvento(modalReservas.id).map((r) => (
                     <tr key={r.id}>
                       <td>{r.cliente?.nombre || "—"}</td>
+                      <td className="td-secundario">
+                        {r.cliente?.telefono || "—"}
+                      </td>
+                      <td className="td-secundario">
+                        {r.cliente?.email || "—"}
+                      </td>
                       <td>{r.numPersonas || 1}</td>
                       <td>
                         <span
@@ -532,7 +748,6 @@ function Eventos() {
         </div>
       )}
 
-      {/* Modal editar taller */}
       {modalEditar && (
         <div className="modal-overlay" onClick={() => setModalEditar(null)}>
           <div
@@ -598,6 +813,55 @@ function Eventos() {
               <button
                 className="btn-cancelar"
                 onClick={() => setModalEditar(null)}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {modalEditarPersonas && (
+        <div
+          className="modal-overlay"
+          onClick={() => setModalEditarPersonas(null)}
+        >
+          <div className="modal-taller" onClick={(e) => e.stopPropagation()}>
+            <h2>Editar personas</h2>
+            <p className="modal-taller-subtitulo">
+              {modalEditarPersonas.evento?.nombre}
+            </p>
+            <p
+              style={{
+                fontSize: "0.9rem",
+                color: "#666",
+                marginBottom: "1rem",
+              }}
+            >
+              Cliente: {modalEditarPersonas.cliente?.nombre}
+            </p>
+            <div className="modal-taller-inputs">
+              <input
+                type="number"
+                min="1"
+                placeholder="Número de personas *"
+                value={nuevasPersonas}
+                onChange={(e) => setNuevasPersonas(e.target.value)}
+                style={{ flex: 1, fontSize: "0.95rem" }}
+              />
+            </div>
+            {mensaje && <p className="mensaje-error">{mensaje}</p>}
+            <div className="modal-taller-acciones">
+              <button
+                className="btn-primary"
+                onClick={guardarPersonas}
+                style={{ flex: 1, padding: "0.75rem" }}
+              >
+                Guardar
+              </button>
+              <button
+                className="btn-cancelar"
+                onClick={() => setModalEditarPersonas(null)}
               >
                 Cancelar
               </button>

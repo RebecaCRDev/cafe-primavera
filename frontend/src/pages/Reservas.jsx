@@ -86,6 +86,8 @@ function Reservas() {
         <thead>
           <tr>
             <th>Cliente</th>
+            <th>Teléfono</th>
+            <th>Email</th>
             <th>Taller</th>
             <th>Fecha reserva</th>
             <th>Estado</th>
@@ -96,6 +98,8 @@ function Reservas() {
           {reservas.map((r) => (
             <tr key={r.id}>
               <td>{r.cliente?.nombre || "—"}</td>
+              <td className="td-secundario">{r.cliente?.telefono || "—"}</td>
+              <td className="td-secundario">{r.cliente?.email || "—"}</td>
               <td className="td-secundario">{r.evento?.nombre}</td>
               <td className="td-secundario">
                 {new Date(r.fechaReserva).toLocaleString("es-ES")}

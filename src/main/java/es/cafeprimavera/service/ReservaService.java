@@ -77,4 +77,29 @@ public class ReservaService {
         eventoRepository.save(evento);
         return reservaRepository.save(reserva);
     }
+
+    public Reserva confirmar(Integer id) {
+    Reserva reserva = reservaRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+    reserva.setEstado("CONFIRMADA");
+    return reservaRepository.save(reserva);
+}
+
+    public Reserva editarPersonas(Integer id, Integer nuevasPersonas) {
+        Reserva reserva = reservaRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+        if ("CANCELADA".equals(reserva.getEstado()))
+            throw new RuntimeException("No se puede editar una reserva cancelada");
+
+        Evento evento = reserva.getEvento();
+        int diferencia = nuevasPersonas - reserva.getNumPersonas();
+
+        if (diferencia > 0 && evento.getPlazasDisponibles() < diferencia)
+            throw new RuntimeException("No hay suficientes plazas. Quedan " + evento.getPlazasDisponibles());
+
+        evento.setPlazasDisponibles(evento.getPlazasDisponibles() - diferencia);
+        eventoRepository.save(evento);
+        reserva.setNumPersonas(nuevasPersonas);
+        return reservaRepository.save(reserva);
+    }
 }

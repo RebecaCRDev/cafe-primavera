@@ -37,8 +37,11 @@ public class EmpleadoController {
     @PutMapping("/{id}")
     public ResponseEntity<Empleado> update(@PathVariable Integer id,
                                             @RequestBody Empleado empleado) {
-        return empleadoService.findById(id).map(e -> {
+        return empleadoService.findById(id).map(existente -> {
             empleado.setId(id);
+            if (empleado.getPasswordHash() == null || empleado.getPasswordHash().isBlank()) {
+                empleado.setPasswordHash(existente.getPasswordHash());
+            }
             return ResponseEntity.ok(empleadoService.save(empleado));
         }).orElse(ResponseEntity.notFound().build());
     }
