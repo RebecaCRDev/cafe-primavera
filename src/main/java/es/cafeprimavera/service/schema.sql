@@ -1,0 +1,16 @@
+-- Esquema de base de datos: Café Primavera
+-- Generado desde Neon PostgreSQL
+
+CREATE TABLE categoria (id integer NOT NULL, nombre character varying NOT NULL, tipo character varying NOT NULL);
+CREATE TABLE cliente (id integer NOT NULL, nombre character varying NOT NULL, email character varying, telefono character varying, fecha_registro date NOT NULL);
+CREATE TABLE cierre_caja (id integer NOT NULL, fecha date NOT NULL, total_efectivo numeric NOT NULL, total_tarjeta numeric NOT NULL, total_general numeric NOT NULL, total_cafeteria numeric NOT NULL, total_floristeria numeric NOT NULL, num_pedidos integer NOT NULL, num_cancelados integer NOT NULL, observaciones text, empleado_id integer NOT NULL, created_at timestamp without time zone NOT NULL, total_bizum numeric NOT NULL);
+CREATE TABLE empleado (id integer NOT NULL, nombre character varying NOT NULL, email character varying NOT NULL, password_hash character varying NOT NULL, rol character varying NOT NULL, activo boolean NOT NULL);
+CREATE TABLE evento (id integer NOT NULL, nombre character varying NOT NULL, descripcion text, fecha_hora timestamp without time zone NOT NULL, plazas_totales integer NOT NULL, plazas_disponibles integer NOT NULL, precio numeric NOT NULL, tipo character varying NOT NULL, empleado_id integer NOT NULL);
+CREATE TABLE linea_pedido (id integer NOT NULL, cantidad integer NOT NULL, precio_unitario numeric NOT NULL, pedido_id integer NOT NULL, producto_id integer NOT NULL);
+CREATE TABLE mesa (id integer NOT NULL, numero character varying NOT NULL, zona character varying NOT NULL, capacidad integer NOT NULL, estado character varying NOT NULL, nombre_reserva character varying, hora_reserva character varying, personas_reserva integer);
+CREATE TABLE movimiento_stock (id integer NOT NULL, tipo character varying NOT NULL, cantidad integer NOT NULL, motivo character varying, fecha timestamp without time zone NOT NULL, producto_id integer NOT NULL, empleado_id integer NOT NULL);
+CREATE TABLE pedido (id integer NOT NULL, fecha timestamp without time zone NOT NULL, total numeric NOT NULL, metodo_pago character varying NOT NULL, estado character varying NOT NULL, motivo_cancelacion character varying, empleado_id integer NOT NULL, cliente_id integer, mesa_id integer);
+CREATE TABLE producto (id integer NOT NULL, nombre character varying NOT NULL, descripcion text, precio numeric NOT NULL, stock integer NOT NULL, activo boolean NOT NULL, categoria_id integer NOT NULL);
+CREATE TABLE producto_flor (id integer NOT NULL, fecha_caducidad date, temporada character varying NOT NULL, color character varying, producto_id integer NOT NULL);
+CREATE TABLE registro_appcc (id integer NOT NULL, tipo character varying NOT NULL, descripcion character varying NOT NULL, valor character varying, resultado character varying NOT NULL, observaciones text, fecha timestamp without time zone NOT NULL, empleado_id integer NOT NULL);
+CREATE TABLE reserva (id integer NOT NULL, fecha_reserva timestamp without time zone NOT NULL, num_personas integer NOT NULL, estado character varying NOT NULL, cliente_id integer NOT NULL, evento_id integer NOT NULL);

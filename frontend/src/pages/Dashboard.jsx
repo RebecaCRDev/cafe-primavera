@@ -3,7 +3,6 @@ import api from "../services/api";
 
 function Dashboard({ usuario, onEntrar }) {
   const [datos, setDatos] = useState(null);
-  const [resumen, setResumen] = useState("");
   const [cargando, setCargando] = useState(true);
 
   const rol = usuario.rol;
@@ -17,9 +16,8 @@ function Dashboard({ usuario, onEntrar }) {
     try {
       const res = await api.get("/dashboard");
       setDatos(res.data);
-      await generarResumen(res.data);
     } catch {
-      setResumen("No se pudo cargar el resumen del día.");
+      console.error("Error al cargar el dashboard");
     }
     setCargando(false);
   };
@@ -32,66 +30,6 @@ function Dashboard({ usuario, onEntrar }) {
     if (nivel === "MEDIA")
       return { bg: "#e8f0e0", color: "#6b7c4a", texto: "Media" };
     return { bg: "#f0ece8", color: "#7a6a5a", texto: "Baja" };
-  };
-
-  const generarResumen = async (datos) => {
-    try {
-      let prompt = "";
-      if (rol === "CAJERO") {
-        prompt = `Eres el asistente de Café Primavera, una cafetería-floristería.
-Genera una previsión del día para ${usuario.nombre}, cajero de la cafetería.
-Datos de hoy:
-- Mesas reservadas ahora mismo: ${datos.reservasMesaHoy}
-- Mesas ocupadas: ${datos.mesasOcupadas}, mesas libres: ${datos.mesasLibres}
-- Previsión de afluencia: ${datos.previsionAfluencia}
-- ${datos.previsionDescripcion}
-- Talleres hoy (afectará afluencia): ${datos.talleresHoy}
-- Productos de cafetería con stock crítico: ${datos.stockCriticoCafeteria}
-${datos.productosCriticosCafeteria?.length > 0 ? "- Productos a reponer: " + datos.productosCriticosCafeteria.join(", ") : ""}
-El resumen debe ser en español, 3-4 frases, tono cálido. Enfócate en la cafetería. Termina con un mensaje motivador.`;
-      } else if (rol === "FLORISTA") {
-        prompt = `Eres el asistente de Café Primavera, una cafetería-floristería.
-Genera una previsión del día para ${usuario.nombre}, florista.
-Datos de hoy:
-- Talleres programados hoy: ${datos.talleresHoy}
-${datos.detalleTalleresHoy?.map((t) => `  · ${t.nombre} a las ${t.hora} — ${t.plazasReservadas} personas reservadas de ${t.plazasTotales}`).join("\n") || ""}
-- Flores próximas a caducar (≤3 días): ${datos.floresCaducando}
-${datos.nombresFloresCaducando?.length > 0 ? "- Flores a gestionar: " + datos.nombresFloresCaducando.join(", ") : ""}
-- Productos de floristería con stock crítico: ${datos.stockCriticoFloristeria}
-${datos.productosCriticosFloristeria?.length > 0 ? "- Productos a reponer: " + datos.productosCriticosFloristeria.join(", ") : ""}
-El resumen debe ser en español, 3-4 frases, tono cálido. Enfócate en la floristería y los talleres. Termina con un mensaje motivador.`;
-      } else {
-        prompt = `Eres el asistente de Café Primavera, una cafetería-floristería.
-Genera una previsión del día para ${usuario.nombre}, administrador.
-Datos de hoy:
-- Mesas reservadas: ${datos.reservasMesaHoy}, ocupadas: ${datos.mesasOcupadas}, libres: ${datos.mesasLibres}
-- Previsión de afluencia: ${datos.previsionAfluencia} — ${datos.previsionDescripcion}
-- Talleres hoy: ${datos.talleresHoy}
-${datos.detalleTalleresHoy?.map((t) => `  · ${t.nombre} a las ${t.hora} — ${t.plazasReservadas}/${t.plazasTotales} plazas`).join("\n") || ""}
-- Stock crítico cafetería: ${datos.stockCriticoCafeteria} productos
-- Stock crítico floristería: ${datos.stockCriticoFloristeria} productos
-- Flores próximas a caducar: ${datos.floresCaducando}
-El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más urgente. Termina con un mensaje motivador.`;
-      }
-
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 400,
-          messages: [{ role: "user", content: prompt }],
-        }),
-      });
-      const data = await response.json();
-      setResumen(
-        data.content?.[0]?.text || "Buen día, que vaya bien la jornada.",
-      );
-    } catch {
-      setResumen(
-        "Buen día. Revisa las reservas y el stock antes de empezar la jornada.",
-      );
-    }
   };
 
   const tarjetasCajero = () =>
@@ -299,21 +237,6 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
           </div>
         )}
 
-        {/* Resumen IA */}
-        <div className="card dashboard-resumen">
-          <h2 className="dashboard-seccion-title-verde">
-            ✨ Previsión del día
-          </h2>
-          {cargando ? (
-            <div className="dashboard-cargando">
-              <div className="dashboard-spinner"></div>
-              Preparando la previsión del día...
-            </div>
-          ) : (
-            <p className="dashboard-resumen-texto">{resumen}</p>
-          )}
-        </div>
-
         {/* Stock crítico cafetería */}
         {datos?.productosCriticosCafeteria?.length > 0 &&
           (rol === "CAJERO" || rol === "ADMIN") && (
@@ -369,10 +292,7 @@ El resumen debe ser en español, 4-5 frases, tono profesional. Menciona lo más 
           Entrar a la aplicación →
         </button>
       </div>
-
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }
-
 export default Dashboard;

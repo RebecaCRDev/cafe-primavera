@@ -51,3 +51,7 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Variables de entorno backend
+src/main/resources/application-local.properties
+src/main/resources/application-secret.properties

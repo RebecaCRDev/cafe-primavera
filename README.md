@@ -10,8 +10,19 @@ Desarrollada como Trabajo de Fin de Grado del Ciclo Superior de Desarrollo de Ap
 
 - **Backend:** Java 21 + Spring Boot 4.0.3 + Maven
 - **Frontend:** React 18 + Vite
-- **Base de datos:** PostgreSQL 17 en Neon (cloud)
+- **Base de datos:** PostgreSQL en Neon (cloud)
 - **Documentación API:** Swagger / OpenAPI 3.1
+
+---
+
+## Funcionalidades principales
+
+- **Salón** — mapa visual de mesas con gestión de pedidos en tiempo real
+- **Inventario** — control de stock con alertas de caducidad para productos florales
+- **Talleres** — gestión de talleres con reservas y control de aforo
+- **APPCC** — registro de controles de higiene alimentaria
+- **Cierre de caja** — desglose diario de ingresos por área de negocio
+- **Dashboard** — previsión del día adaptada al rol del empleado, con alertas de stock crítico y estado de mesas
 
 ---
 
@@ -31,8 +42,7 @@ cd cafe-primavera
 ```
 
 El backend arranca en `http://localhost:8080`
-
-La documentación Swagger estará disponible en `http://localhost:8080/swagger-ui/index.html`
+Swagger disponible en `http://localhost:8080/swagger-ui/index.html`
 
 ### Frontend
 
@@ -56,37 +66,31 @@ El frontend arranca en `http://localhost:5173`
 
 ---
 
-## Estructura del proyecto
-
-cafe-primavera/
-├── src/
-│ └── main/
-│ └── java/es/cafeprimavera/
-│ ├── controller/ # Endpoints REST
-│ ├── service/ # Lógica de negocio
-│ ├── repository/ # Acceso a datos
-│ └── model/ # Entidades JPA
-├── frontend/
-│ └── src/
-│ ├── pages/ # Páginas React
-│ ├── components/ # Componentes reutilizables
-│ ├── context/ # Context API (carrito)
-│ └── services/ # Configuración Axios
-└── pom.xml
-
----
-
 ## Roles y permisos
 
 | Funcionalidad          | ADMIN | CAJERO | FLORISTA |
 | ---------------------- | ----- | ------ | -------- |
-| Salón y TPV            | ✓     | ✓      | ✗        |
+| Salón y pedidos        | ✓     | ✓      | ✗        |
 | Inventario cafetería   | ✓     | ✓      | ✗        |
 | Inventario floristería | ✓     | ✗      | ✓        |
 | Talleres y reservas    | ✓     | ✗      | ✓        |
 | APPCC                  | ✓     | ✓      | ✓        |
 | Cierre de caja         | ✓     | ✓      | ✓        |
 | Empleados              | ✓     | ✗      | ✗        |
+
+---
+
+## Seguridad
+
+- Autenticación propia con cifrado **SHA256 con sal**
+- Control de acceso basado en roles (RBAC): ADMIN, CAJERO, FLORISTA
+- Restricción de rutas en frontend y validación de rol en backend
+
+---
+
+## Base de datos
+
+Esquema completo disponible en `schema.sql`. 13 tablas organizadas en 5 módulos funcionales: catálogo, personas, ventas, talleres y operaciones.
 
 ---
 
