@@ -131,19 +131,22 @@ function Eventos() {
       (r) => r.evento?.id === eventoId && r.estado !== "CANCELADA",
     );
 
-  const crearReserva = () => {
-    if (!eventoSeleccionado || !nombreCliente)
-      return setMensaje("Introduce el nombre del cliente");
+  const crearReserva = async () => {
+    if (!eventoSeleccionado || !nombreCliente || !emailCliente)
+      return setMensaje("Nombre y email son obligatorios para la reserva");
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(emailCliente))
+      return setMensaje("El email no es válido");
+
+    if (telefonoCliente && !/^\d{9}$/.test(telefonoCliente))
+      return setMensaje("El teléfono debe tener exactamente 9 dígitos");
 
     const personas = parseInt(numPersonas) || 1;
     if (personas > eventoSeleccionado.plazasDisponibles)
       return setMensaje(
         `Solo quedan ${eventoSeleccionado.plazasDisponibles} plazas disponibles`,
       );
-
-    const clienteExistente = clientes.find(
-      (c) => c.nombre.toLowerCase() === nombreCliente.toLowerCase(),
-    );
 
     const hacerReserva = (clienteId) => {
       api
@@ -168,17 +171,26 @@ function Eventos() {
         );
     };
 
-    if (clienteExistente) {
-      hacerReserva(clienteExistente.id);
-    } else {
-      api
-        .post("/clientes", {
-          nombre: nombreCliente,
-          telefono: telefonoCliente || null,
-          email: emailCliente || null,
-        })
-        .then((res) => hacerReserva(res.data.id))
-        .catch(() => setMensaje("Error al crear el cliente"));
+    try {
+      const res = await api.get("/clientes");
+      const clienteExistente = res.data.find(
+        (c) => c.email?.toLowerCase() === emailCliente.toLowerCase(),
+      );
+
+      if (clienteExistente) {
+        hacerReserva(clienteExistente.id);
+      } else {
+        api
+          .post("/clientes", {
+            nombre: nombreCliente,
+            telefono: telefonoCliente || null,
+            email: emailCliente,
+          })
+          .then((res) => hacerReserva(res.data.id))
+          .catch(() => setMensaje("Error al crear el cliente"));
+      }
+    } catch {
+      setMensaje("Error al verificar el cliente");
     }
   };
 
@@ -640,13 +652,13 @@ function Eventos() {
               style={{ marginTop: "0.5rem", flexDirection: "column" }}
             >
               <input
-                placeholder="Teléfono"
+                placeholder="Teléfono (9 dígitos, opcional)"
                 value={telefonoCliente}
                 onChange={(e) => setTelefonoCliente(e.target.value)}
                 style={{ fontSize: "0.95rem", width: "100%" }}
               />
               <input
-                placeholder="Email"
+                placeholder="Email * (obligatorio)"
                 value={emailCliente}
                 onChange={(e) => setEmailCliente(e.target.value)}
                 style={{
