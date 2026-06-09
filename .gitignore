@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-application.properties
+
 
 # Frontend
 frontend/node_modules/
