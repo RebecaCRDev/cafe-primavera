@@ -18,6 +18,8 @@ function Salon() {
   const [motivoCancelacion, setMotivoCancelacion] = useState("");
   const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
+  const [facturaLineas, setFacturaLineas] = useState([]);
+  const [facturaPedido, setFacturaPedido] = useState(null);
 
   const usuario = JSON.parse(localStorage.getItem("usuario"));
 
@@ -42,14 +44,13 @@ function Salon() {
     setMetodoPago("EFECTIVO");
 
     if (mesa.estado === "LIBRE") {
-      setModal("opciones");
+      setModal(mesa.numero === "LLEVAR" ? "llevar" : "opciones");
       return;
     }
     if (mesa.estado === "RESERVADA") {
       setModal("reservada");
       return;
     }
-
     if (mesa.estado === "OCUPADA") {
       setCargando(true);
       setModal("pedido");
@@ -83,6 +84,23 @@ function Salon() {
   };
 
   const ocuparMesa = async () => {
+    const resMesa = await api.patch(
+      `/mesas/${mesaActiva.id}/estado?estado=OCUPADA`,
+    );
+    const resPedido = await api.post("/pedidos", {
+      metodoPago: "EFECTIVO",
+      estado: "ABIERTO",
+      empleado: { id: usuario.id },
+      mesa: { id: mesaActiva.id },
+    });
+    setMesas(mesas.map((m) => (m.id === mesaActiva.id ? resMesa.data : m)));
+    setMesaActiva(resMesa.data);
+    setPedidoActivo(resPedido.data);
+    setLineasPedido([]);
+    setModal("pedido");
+  };
+
+  const iniciarLlevar = async () => {
     const resMesa = await api.patch(
       `/mesas/${mesaActiva.id}/estado?estado=OCUPADA`,
     );
@@ -200,6 +218,31 @@ function Salon() {
     }
   };
 
+  const cobrarYFactura = async () => {
+    if (!pedidoActivo || lineasPedido.length === 0)
+      return setMensaje("No hay productos en el pedido");
+    if (
+      metodoPago === "EFECTIVO" &&
+      (!importeEntregado || parseFloat(importeEntregado) < totalPedido)
+    )
+      return setMensaje("El importe entregado debe ser igual o mayor al total");
+    try {
+      await api.patch(
+        `/pedidos/${pedidoActivo.id}/cerrar?metodoPago=${metodoPago}`,
+      );
+      setFacturaPedido({ ...pedidoActivo, metodoPago, total: totalPedido });
+      setFacturaLineas([...lineasPedido]);
+      cargarMesas();
+      setModal("factura");
+      setMesaActiva(null);
+      setPedidoActivo(null);
+      setLineasPedido([]);
+      setImporteEntregado("");
+    } catch {
+      setMensaje("Error al cobrar el pedido");
+    }
+  };
+
   const cancelarPedido = async () => {
     if (!pedidoActivo) {
       await api.patch(`/mesas/${mesaActiva.id}/estado?estado=LIBRE`);
@@ -216,6 +259,10 @@ function Salon() {
     } catch {
       setMensaje("Error al cancelar el pedido");
     }
+  };
+
+  const imprimirFactura = () => {
+    window.print();
   };
 
   const totalPedido = lineasPedido.reduce(
@@ -304,6 +351,40 @@ function Salon() {
     );
   };
 
+  const BotoLlevar = () => {
+    const mesa = getMesa("LLEVAR");
+    if (!mesa) return null;
+    const c = colorMesa(mesa.estado);
+    return (
+      <div
+        onClick={() => abrirModal(mesa)}
+        style={{
+          position: "absolute",
+          bottom: "20px",
+          left: "20px",
+          width: "100px",
+          height: "44px",
+          borderRadius: "8px",
+          background: c.bg,
+          border: `2px solid ${c.border}`,
+          color: c.color,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          fontSize: "0.75rem",
+          fontWeight: "bold",
+          transition: "all 0.2s",
+          userSelect: "none",
+          gap: "0.3rem",
+        }}
+        title={`Para llevar - ${mesa.estado}`}
+      >
+        🛍️ Llevar
+      </div>
+    );
+  };
+
   const libres = mesas.filter((m) => m.estado === "LIBRE").length;
   const ocupadas = mesas.filter((m) => m.estado === "OCUPADA").length;
   const reservadas = mesas.filter((m) => m.estado === "RESERVADA").length;
@@ -370,9 +451,36 @@ function Salon() {
             <Mesa numero="I13" top="250px" left="210px" />
             <Mesa numero="I14" top="250px" left="290px" />
             <Mesa numero="I15" top="250px" left="370px" />
+            <BotoLlevar />
           </div>
         </div>
       </div>
+
+      {/* MODAL LLEVAR */}
+      {modal === "llevar" && (
+        <div className="modal-overlay" onClick={cerrarModal}>
+          <div className="modal-salon" onClick={(e) => e.stopPropagation()}>
+            <h2>🛍️ Para llevar</h2>
+            <p className="modal-salon-desc">
+              Pedido para llevar — sin mesa asignada
+            </p>
+            <button
+              className="btn-primary"
+              onClick={iniciarLlevar}
+              style={{ width: "100%", padding: "0.85rem" }}
+            >
+              🛍️ Iniciar pedido para llevar
+            </button>
+            <button
+              className="btn-cancelar"
+              onClick={cerrarModal}
+              style={{ width: "100%", marginTop: "0.75rem" }}
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* MODAL OPCIONES */}
       {modal === "opciones" && (
@@ -576,7 +684,9 @@ function Salon() {
             <div className="modal-pedido-panel">
               <div className="modal-pedido-header">
                 <h2 className="modal-pedido-header-titulo">
-                  Mesa {mesaActiva?.numero}
+                  {mesaActiva?.numero === "LLEVAR"
+                    ? "🛍️ Para llevar"
+                    : `Mesa ${mesaActiva?.numero}`}
                 </h2>
                 <span className="badge-ocupada">OCUPADA</span>
               </div>
@@ -688,10 +798,21 @@ function Salon() {
                   style={{
                     width: "100%",
                     padding: "0.75rem",
-                    marginBottom: "0.5rem",
+                    marginBottom: "0.4rem",
                   }}
                 >
                   Cobrar {totalPedido.toFixed(2)}€
+                </button>
+                <button
+                  onClick={cobrarYFactura}
+                  className="btn-gestionar"
+                  style={{
+                    width: "100%",
+                    padding: "0.6rem",
+                    marginBottom: "0.4rem",
+                  }}
+                >
+                  🧾 Cobrar y generar factura
                 </button>
                 <button
                   onClick={() => setModal("cancelar")}
@@ -758,6 +879,153 @@ function Salon() {
                 onClick={() => setModal("pedido")}
               >
                 Volver
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL FACTURA */}
+      {modal === "factura" && facturaPedido && (
+        <div className="modal-overlay" onClick={() => setModal(null)}>
+          <div
+            className="modal-caja"
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "480px" }}
+          >
+            <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+              <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🌸</div>
+              <h2 style={{ marginBottom: "0.2rem" }}>Café Primavera</h2>
+              <p style={{ color: "#9e8e7e", fontSize: "0.85rem" }}>
+                Cafetería & Floristería
+              </p>
+              <p
+                style={{
+                  color: "#9e8e7e",
+                  fontSize: "0.8rem",
+                  marginTop: "0.5rem",
+                }}
+              >
+                {new Date().toLocaleString("es-ES")}
+              </p>
+            </div>
+
+            <div
+              style={{
+                borderTop: "1px dashed #e8ddd0",
+                borderBottom: "1px dashed #e8ddd0",
+                padding: "1rem 0",
+                marginBottom: "1rem",
+              }}
+            >
+              {facturaLineas.map((l) => (
+                <div
+                  key={l.id}
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "0.4rem",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  <span>
+                    {productos.find((p) => p.id === l.producto?.id)?.nombre ||
+                      l.producto?.nombre ||
+                      "Producto"}{" "}
+                    × {l.cantidad}
+                  </span>
+                  <span>{(l.precioUnitario * l.cantidad).toFixed(2)}€</span>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontWeight: "bold",
+                  fontSize: "1.1rem",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                <span>TOTAL</span>
+                <span>{facturaPedido.total.toFixed(2)}€</span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: "0.85rem",
+                  color: "#7a6a5a",
+                }}
+              >
+                <span>Método de pago</span>
+                <span>
+                  {facturaPedido.metodoPago === "EFECTIVO"
+                    ? "💵 Efectivo"
+                    : "💳 Tarjeta"}
+                </span>
+              </div>
+              {facturaPedido.metodoPago === "EFECTIVO" && importeEntregado && (
+                <>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: "0.85rem",
+                      color: "#7a6a5a",
+                    }}
+                  >
+                    <span>Entregado</span>
+                    <span>{parseFloat(importeEntregado).toFixed(2)}€</span>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      fontSize: "0.85rem",
+                      color: "#6b7c4a",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    <span>Cambio</span>
+                    <span>
+                      {(
+                        parseFloat(importeEntregado) - facturaPedido.total
+                      ).toFixed(2)}
+                      €
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+
+            <p
+              style={{
+                textAlign: "center",
+                color: "#9e8e7e",
+                fontSize: "0.8rem",
+                marginBottom: "1.5rem",
+              }}
+            >
+              ¡Gracias por su visita!
+            </p>
+
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              <button
+                className="btn-primary"
+                onClick={imprimirFactura}
+                style={{ flex: 1, padding: "0.75rem" }}
+              >
+                🖨️ Imprimir
+              </button>
+              <button
+                className="btn-cancelar"
+                onClick={() => setModal(null)}
+                style={{ flex: 1 }}
+              >
+                Cerrar
               </button>
             </div>
           </div>
