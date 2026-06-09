@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
-import { CarritoProvider } from "./context/CarritoContext";
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -61,19 +60,17 @@ function App() {
 
   return (
     <BrowserRouter>
-      <CarritoProvider>
-        <Navbar usuario={usuario} onLogout={handleLogout} />
-        <Routes>
-          <Route path="/" element={<Navigate to={rutaInicio} />} />
-          <Route path="/salon" element={cajeroOAdmin(<Salon />)} />
-          <Route path="/productos" element={<Productos />} />
-          <Route path="/eventos" element={floristaOAdmin(<Eventos />)} />
-          <Route path="/appcc" element={<Appcc />} />
-          <Route path="/cierre-caja" element={<CierreCaja />} />
-          <Route path="/empleados" element={soloAdmin(<Empleados />)} />
-          <Route path="/reservas" element={floristaOAdmin(<Reservas />)} />
-        </Routes>
-      </CarritoProvider>
+      <Navbar usuario={usuario} onLogout={handleLogout} />
+      <Routes>
+        <Route path="/" element={<Navigate to={rutaInicio} />} />
+        <Route path="/salon" element={cajeroOAdmin(<Salon />)} />
+        <Route path="/productos" element={<Productos />} />
+        <Route path="/eventos" element={floristaOAdmin(<Eventos />)} />
+        <Route path="/appcc" element={<Appcc />} />
+        <Route path="/cierre-caja" element={<CierreCaja />} />
+        <Route path="/empleados" element={soloAdmin(<Empleados />)} />
+        <Route path="/reservas" element={floristaOAdmin(<Reservas />)} />
+      </Routes>
     </BrowserRouter>
   );
 }
